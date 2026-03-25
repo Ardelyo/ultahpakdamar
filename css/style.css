@@ -76,8 +76,11 @@ body {
    ========================================= */
 #fluid-canvas {
     position: fixed; inset: 0; z-index: -2;
-    background-color: var(--color-3); /* Simplify to solid background for cleaner cuts */
-    transition: background-color 0.1s;
+    background: 
+        radial-gradient(circle at 20% 30%, var(--color-1), transparent 70%),
+        radial-gradient(circle at 80% 80%, var(--color-2), transparent 70%),
+        var(--color-3);
+    transition: background 0.2s; /* Short transition for "cutting" feel */
 }
 
 .cinematic-grain {
@@ -277,7 +280,8 @@ body {
     position: relative; height: 100vh; width: 100vw;
     display: flex; align-items: center; justify-content: center;
     overflow: hidden; pointer-events: none;
-    background: var(--color-3); /* Removed radial-gradient */
+    background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.3) 100%);
+    background-color: var(--color-3);
 }
 
 .quote-wrapper {
