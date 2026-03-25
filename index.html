@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selamat Ulang Tahun, Pak Damar!</title>
+    
+    <!-- Typography: 2 Font Konsisten -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,600;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+
+    <!-- Lenis Smooth Scroll CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/lenis@1.1.18/dist/lenis.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- INTERACTIVE BACKGROUND ELEMENTS -->
+    <canvas id="magic-dust"></canvas>
+    <div id="fluid-canvas"></div>
+    <div class="cinematic-grain"></div>
+
+    <!-- CUSTOM CURSOR -->
+    <div class="cursor-dot" id="cursor-dot"></div>
+    <div class="cursor-ring" id="cursor-ring"></div>
+
+    <main>
+        
+        <!-- ACT 1: THE GATEWAY -->
+        <section class="scene-gateway" id="gateway">
+            <div class="mask-wrapper" id="maskWrapper">
+                <svg class="svg-mask" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice">
+                    <defs>
+                        <mask id="text-portal">
+                            <rect width="100%" height="100%" fill="white" />
+                            <text x="50%" y="55%" text-anchor="middle" dominant-baseline="middle" 
+                                  font-family="'Instrument Serif', serif" font-size="200" font-weight="400" 
+                                  letter-spacing="-2" fill="black" class="interactive-hover">
+                                PAK DAMAR
+                            </text>
+                        </mask>
+                    </defs>
+                    <rect width="100%" height="100%" fill="var(--overlay-color)" mask="url(#text-portal)" />
+                </svg>
+            </div>
+            <div class="gateway-subtitle" id="gatewaySubtitle">
+                Scroll Untuk Merayakan
+                <div class="gateway-line"></div>
+            </div>
+        </section>
+
+        <!-- ACT 2: FAST 3D POLAROID RUSH -->
+        <section class="scene-polaroid" id="polaroidScene">
+            <div class="tunnel-vignette"></div>
+            <div class="polaroid-bg-text" id="polaroidBgText">Momen & Cerita</div>
+            <div class="polaroid-cam" id="polaroidCam">
+                <!-- Injected via JS -->
+            </div>
+        </section>
+
+        <!-- ACT 3: THE IMPACT (Text Reveal) -->
+        <section class="scene-impact" id="impactScene">
+            <div class="reveal-text-container" id="revealText">
+                Bagi kami, Bapak bukan sekadar pengajar di kelas. Bapak adalah ruang aman bagi ide-ide seru, arsitek di balik keberanian kami, dan alasan kenapa belajar bisa jadi sangat menyenangkan. Selamat bertambah usia!
+            </div>
+        </section>
+
+        <!-- ACT 4: LOCKED QUOTES -->
+        <section class="scene-quotes" id="sceneQuotes">
+            <div class="quote-wrapper">
+                <div class="quote-item">
+                    "Pintu ruangannya selalu terbuka... tempat terbaik buat curhat (atau sekadar numpang ngadem)."
+                    <span class="quote-author">Pasukan Meja Belakang</span>
+                </div>
+                <div class="quote-item italic">
+                    "Lebih dari sekadar guru, Bapak adalah teman diskusi yang nggak pernah kehabisan cerita seru."
+                    <span class="quote-author">Catatan Anak Didik</span>
+                </div>
+                <div class="quote-item">
+                    "Selamat ulang tahun, Pak! Tetap jadi sosok asik yang bikin kami selalu berani bermimpi besar."
+                    <span class="quote-author">Doa Kami</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ACT 5: THE CELEBRATION -->
+        <section class="scene-horizon" id="horizon">
+            <div class="horizon-glow" id="horizonGlow"></div>
+            
+            <div class="final-quote-container interactive-hover" id="epicQuote">
+                <div class="final-quote-line1">SELAMAT ULANG TAHUN, PAK DAMAR!</div>
+                <div class="final-quote-line2">Terima kasih karena selalu menanamkan mantra ini kepada kami:</div>
+                <div class="final-quote-line3">"If you have a dream,<br>you have a will,<br>if you have a will,<br>you have a way."</div>
+            </div>
+
+            <div class="final-credit interactive-hover" id="finalCredit">Dari murid-muridmu: Hazel dan Ardellio</div>
+        </section>
+
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- Custom Script -->
+    <script src="js/script.js"></script>
+</body>
+</html>

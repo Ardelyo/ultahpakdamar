@@ -1,0 +1,290 @@
+/* =========================================
+   DESIGN TOKENS & FLUID PALETTE
+   ========================================= */
+:root {
+    /* Warna dinamis yang akan dianimasikan oleh GSAP */
+    --color-1: #1e3a8a; 
+    --color-2: #3b82f6; 
+    --color-3: #0f172a; 
+    
+    --text-primary: #F8FAFC;
+    --text-muted: rgba(248, 250, 252, 0.4);
+    --text-accent: #FBBF24;
+    
+    --font-serif: 'Instrument Serif', serif;
+    --font-sans: 'DM Sans', sans-serif;
+    --overlay-color: #020617; 
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; cursor: none; /* Sembunyikan kursor asli */ }
+
+body {
+    background-color: var(--color-3);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { display: none; }
+
+/* =========================================
+   CUSTOM CURSOR & MAGIC DUST (New)
+   ========================================= */
+#magic-dust {
+    position: fixed; inset: 0; z-index: -1;
+    pointer-events: none;
+}
+
+.cursor-dot, .cursor-ring {
+    position: fixed; top: 0; left: 0;
+    transform: translate(-50%, -50%);
+    border-radius: 50%; pointer-events: none;
+    z-index: 9999;
+}
+
+.cursor-dot {
+    width: 8px; height: 8px; background: var(--text-accent);
+    transition: transform 0.2s ease-out;
+}
+
+.cursor-ring {
+    width: 40px; height: 40px; 
+    border: 1px solid rgba(251, 191, 36, 0.5);
+    transition: width 0.3s ease, height 0.3s ease, background 0.3s ease;
+}
+
+/* State saat kursor di-hover ke elemen penting */
+.cursor-ring.hover-active {
+    width: 80px; height: 80px;
+    background: rgba(251, 191, 36, 0.1);
+    backdrop-filter: blur(2px);
+    border-color: var(--text-accent);
+}
+
+/* =========================================
+   1. CANVAS & GRAIN
+   ========================================= */
+#fluid-canvas {
+    position: fixed; inset: 0; z-index: -2;
+    background: 
+        radial-gradient(circle at 20% 30%, var(--color-1), transparent 60%),
+        radial-gradient(circle at 80% 80%, var(--color-2), transparent 60%),
+        var(--color-3);
+    transition: background 0.1s;
+}
+
+.cinematic-grain {
+    position: fixed; inset: 0; z-index: 999; pointer-events: none;
+    opacity: 0.12; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* =========================================
+   ACT 1: THE GATEWAY
+   ========================================= */
+.scene-gateway {
+    position: relative; height: 100vh; width: 100vw;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+}
+
+.mask-wrapper {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    transform-origin: 50% 55%; will-change: transform;
+}
+
+.svg-mask { width: 100vw; height: 100vh; }
+
+.gateway-subtitle {
+    position: absolute; bottom: 10vh; left: 50%; transform: translateX(-50%);
+    font-family: var(--font-sans); font-size: 0.9rem; letter-spacing: 0.3em;
+    text-transform: uppercase; color: var(--text-muted); font-weight: 600;
+    text-align: center;
+}
+
+.gateway-line {
+    width: 2px; height: 40px; background: var(--text-accent);
+    margin: 20px auto 0; border-radius: 2px;
+    animation: bounce 2s infinite ease-in-out;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: scaleY(1); transform-origin: top; }
+    50% { transform: scaleY(0.5); transform-origin: top; }
+}
+
+/* =========================================
+   ACT 2: 3D POLAROID RUSH
+   ========================================= */
+.scene-polaroid {
+    position: relative; height: 100vh; width: 100vw;
+    overflow: hidden; perspective: 1000px; 
+    background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.5) 100%);
+}
+
+.tunnel-vignette {
+    position: absolute; inset: 0; z-index: 5; pointer-events: none;
+    box-shadow: inset 0 0 200px 80px var(--color-3);
+}
+
+.polaroid-cam {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    transform-style: preserve-3d;
+    /* Akan dianimasikan via JS Mousemove */
+    will-change: transform; 
+}
+
+.polaroid {
+    position: absolute; left: 50%; top: 50%;
+    width: clamp(200px, 20vw, 320px);
+    padding: clamp(10px, 1.5vw, 16px);
+    padding-bottom: clamp(40px, 5vw, 60px);
+    background: #FAFAFA; border-radius: 4px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 0 10px rgba(0,0,0,0.05);
+    pointer-events: auto; /* Agar bisa di-hover */
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    will-change: transform, opacity, filter;
+}
+
+.polaroid:hover {
+    transform: translate(-50%, -50%) translateZ(150px) scale(1.1) rotateZ(2deg) !important;
+    z-index: 10;
+    box-shadow: 0 50px 100px rgba(0,0,0,0.8), 0 0 40px rgba(251, 191, 36, 0.3);
+}
+
+.polaroid-img-wrapper {
+    width: 100%; aspect-ratio: 1/1.1; background: #eee; overflow: hidden;
+}
+
+.polaroid-img-wrapper img {
+    width: 100%; height: 100%; object-fit: cover;
+    filter: contrast(1.1) saturate(1.2) brightness(1.05);
+    transition: transform 0.5s ease;
+}
+
+.polaroid:hover .polaroid-img-wrapper img {
+    transform: scale(1.05);
+}
+
+.polaroid-caption {
+    position: absolute; bottom: 15px; left: 0; width: 100%;
+    text-align: center; font-family: var(--font-sans);
+    font-weight: 600; font-size: 1.1rem; color: #333;
+}
+
+.polaroid-bg-text {
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%, -50%) translateZ(-2000px);
+    font-family: var(--font-sans); font-weight: 600; font-size: clamp(4rem, 12vw, 15rem);
+    color: rgba(255,255,255,0.04); white-space: nowrap;
+    text-transform: uppercase; letter-spacing: -0.02em; pointer-events: none;
+}
+
+/* =========================================
+   ACT 3: THE IMPACT
+   ========================================= */
+.scene-impact {
+    position: relative; padding: 30vh 5vw; min-height: 150vh;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10;
+}
+
+.reveal-text-container {
+    max-width: 1200px; text-align: center;
+}
+
+.reveal-word {
+    font-family: var(--font-sans); font-size: clamp(2rem, 5vw, 5rem);
+    font-weight: 400; line-height: 1.3; color: var(--text-muted); 
+    margin-right: 0.3em; display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.reveal-word.highlight {
+    font-weight: 600; color: var(--text-accent);
+    text-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+}
+
+/* Interaksi hover pada teks highlight */
+.reveal-word.highlight:hover {
+    transform: translateY(-10px) scale(1.1);
+}
+
+/* =========================================
+   ACT 4: LOCKED QUOTES
+   ========================================= */
+.scene-quotes {
+    position: relative; height: 100vh; width: 100vw;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; pointer-events: none;
+    background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.3) 100%);
+}
+
+.quote-wrapper {
+    position: relative; width: 90vw; max-width: 1100px; height: 50vh;
+}
+
+.quote-item {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%); width: 100%; text-align: center;
+    font-family: var(--font-sans); font-weight: 400;
+    font-size: clamp(1.5rem, 3.5vw, 3.5rem); line-height: 1.3; 
+    color: var(--text-primary); text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    opacity: 0; 
+}
+
+.quote-author {
+    display: block; margin-top: 2rem;
+    font-family: var(--font-sans); font-size: 0.85rem; font-weight: 600;
+    letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-accent); 
+}
+
+/* =========================================
+   ACT 5: THE CELEBRATION
+   ========================================= */
+.scene-horizon {
+    position: relative; height: 140vh; width: 100vw;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 10; overflow: hidden;
+}
+
+.horizon-glow {
+    position: absolute; inset: 0; z-index: -1;
+    background: radial-gradient(circle at 50% 60%, rgba(251, 191, 36, 0.3) 0%, transparent 70%);
+    opacity: 0; mix-blend-mode: screen;
+}
+
+.final-quote-container {
+    text-align: center; max-width: 1400px; padding: 0 2rem;
+    display: flex; flex-direction: column; gap: 1.5rem;
+    position: relative; z-index: 5;
+}
+
+.final-quote-line1 {
+    font-family: var(--font-sans); font-weight: 600; font-size: clamp(1.8rem, 4vw, 3.5rem);
+    color: var(--text-accent); letter-spacing: 0.05em; text-transform: uppercase;
+    text-shadow: 0 0 30px rgba(251, 191, 36, 0.5);
+}
+
+.final-quote-line2 {
+    font-family: var(--font-sans); font-weight: 300; font-size: clamp(1rem, 2vw, 1.8rem);
+    color: rgba(255,255,255,0.8); margin-bottom: 1rem;
+}
+
+.final-quote-line3 {
+    font-family: var(--font-serif); font-style: italic; font-size: clamp(3rem, 7vw, 7rem);
+    color: #FFFFFF; line-height: 1.1;
+    text-shadow: 0 0 60px rgba(251, 191, 36, 0.4), 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.final-credit {
+    margin-top: 15vh; font-family: var(--font-sans); font-weight: 600;
+    font-size: 0.8rem; letter-spacing: 0.3em; text-transform: uppercase; 
+    color: rgba(255,255,255,0.4); z-index: 5;
+}
+
+.interactive-hover { pointer-events: auto; }
+.italic { font-style: italic; }
