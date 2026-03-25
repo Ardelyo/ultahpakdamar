@@ -21,23 +21,29 @@ const cursorRing = document.getElementById('cursor-ring');
 let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
 let ringX = mouseX, ringY = mouseY;
 
-window.addEventListener('mousemove', (e) => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-    
-    // Dot follows instantly
-    cursorDot.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%)`;
-});
+// Check if device is touch-capable
+const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-// Ring follows with easing (GSAP ticker for smooth animation)
-gsap.ticker.add(() => {
-    ringX += (mouseX - ringX) * 0.15;
-    ringY += (mouseY - ringY) * 0.15;
-    cursorRing.style.transform = `translate(${ringX}px, ${ringY}px) translate(-50%, -50%)`;
-});
+if (!isTouchDevice) {
+    window.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        
+        // Dot follows instantly
+        cursorDot.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%)`;
+    });
+
+    // Ring follows with easing
+    gsap.ticker.add(() => {
+        ringX += (mouseX - ringX) * 0.15;
+        ringY += (mouseY - ringY) * 0.15;
+        cursorRing.style.transform = `translate(${ringX}px, ${ringY}px) translate(-50%, -50%)`;
+    });
+}
 
 // Add hover logic for interactive elements
 const attachHoverEffects = () => {
+    if (isTouchDevice) return; // Skip hover effects on touch devices
     const interactives = document.querySelectorAll('.interactive-hover, .polaroid, .reveal-word.highlight');
     interactives.forEach(el => {
         el.addEventListener('mouseenter', () => cursorRing.classList.add('hover-active'));
@@ -151,15 +157,17 @@ imageUrls.forEach((url, i) => {
     polaroidCam.appendChild(div);
 });
 
-// Kamera Parallax Mengikuti Mouse
-window.addEventListener('mousemove', (e) => {
-    const xRot = (e.clientX / window.innerWidth - 0.5) * 20; // max 10deg
-    const yRot = (e.clientY / window.innerHeight - 0.5) * 20;
-    gsap.to(polaroidCam, {
-        rotationY: xRot, rotationX: -yRot, 
-        ease: "power2.out", duration: 1.5
+// Kamera Parallax Mengikuti Mouse (Disabled on Touch)
+if (!isTouchDevice) {
+    window.addEventListener('mousemove', (e) => {
+        const xRot = (e.clientX / window.innerWidth - 0.5) * 20; // max 10deg
+        const yRot = (e.clientY / window.innerHeight - 0.5) * 20;
+        gsap.to(polaroidCam, {
+            rotationY: xRot, rotationX: -yRot, 
+            ease: "power2.out", duration: 1.5
+        });
     });
-});
+}
 
 const polaroids = gsap.utils.toArray('.polaroid');
 const rushTl = gsap.timeline({
@@ -169,10 +177,14 @@ const rushTl = gsap.timeline({
 rushTl.to("#polaroidBgText", { z: -1000, scale: 1.2, opacity: 0.1, ease: "none" }, 0);
 
 polaroids.forEach((p, i) => {
-    const xPos = gsap.utils.random(-window.innerWidth * 0.7, window.innerWidth * 0.7);
-    const yPos = gsap.utils.random(-window.innerHeight * 0.5, window.innerHeight * 0.5);
+    const isMobile = window.innerWidth < 768;
+    const xSpread = isMobile ? window.innerWidth * 0.4 : window.innerWidth * 0.7;
+    const ySpread = isMobile ? window.innerHeight * 0.6 : window.innerHeight * 0.5;
+    
+    const xPos = gsap.utils.random(-xSpread, xSpread);
+    const yPos = gsap.utils.random(-ySpread, ySpread);
     const startZ = gsap.utils.random(-5000, -3000); 
-    const endZ = 1200; 
+    const endZ = isMobile ? 1800 : 1200; // Fly further past camera on mobile
     const rot = gsap.utils.random(-30, 30);
 
     // Simpan variabel state awal via custom attribute

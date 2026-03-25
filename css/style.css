@@ -16,7 +16,11 @@
     --overlay-color: #020617; 
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; cursor: none; /* Sembunyikan kursor asli */ }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+@media (pointer: fine) {
+    * { cursor: none; }
+}
 
 body {
     background-color: var(--color-3);
@@ -41,6 +45,11 @@ body {
     transform: translate(-50%, -50%);
     border-radius: 50%; pointer-events: none;
     z-index: 9999;
+    display: none; /* Hidden by default, shown only on fine pointers */
+}
+
+@media (pointer: fine) {
+    .cursor-dot, .cursor-ring { display: block; }
 }
 
 .cursor-dot {
@@ -113,6 +122,61 @@ body {
 @keyframes bounce {
     0%, 100% { transform: scaleY(1); transform-origin: top; }
     50% { transform: scaleY(0.5); transform-origin: top; }
+}
+
+/* =========================================
+   MOBILE RESPONSIVENESS (Media Queries)
+   ========================================= */
+
+@media screen and (max-width: 768px) {
+    /* ACT 1: Adjust SVG Mask for Portrait */
+    .svg-mask text {
+        font-size: 140px; /* Smaller font for better fit */
+    }
+    
+    .mask-wrapper {
+        transform-origin: 50% 55%;
+    }
+
+    /* ACT 3: Reveal Text adjustments */
+    .scene-impact {
+        padding: 30vh 8vw;
+    }
+    .reveal-word {
+        font-size: clamp(1.8rem, 8vw, 3rem);
+        margin-right: 0.2em;
+    }
+
+    /* ACT 4: Quote adjustments */
+    .quote-item {
+        font-size: clamp(1.2rem, 6vw, 2.2rem);
+        width: 85vw;
+    }
+
+    /* ACT 5: Final Scene adjustments */
+    .final-quote-line3 {
+        font-size: clamp(2.2rem, 10vw, 4rem);
+    }
+    
+    .final-quote-container {
+        gap: 1rem;
+    }
+    
+    .final-credit {
+        margin-top: 10vh;
+        font-size: 0.7rem;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .svg-mask text {
+        font-size: 110px;
+    }
+    
+    .gateway-subtitle {
+        font-size: 0.75rem;
+        letter-spacing: 0.2rem;
+    }
 }
 
 /* =========================================
