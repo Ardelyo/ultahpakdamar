@@ -76,11 +76,8 @@ body {
    ========================================= */
 #fluid-canvas {
     position: fixed; inset: 0; z-index: -2;
-    background: 
-        radial-gradient(circle at 20% 30%, var(--color-1), transparent 60%),
-        radial-gradient(circle at 80% 80%, var(--color-2), transparent 60%),
-        var(--color-3);
-    transition: background 0.1s;
+    background-color: var(--color-3); /* Simplify to solid background for cleaner cuts */
+    transition: background-color 0.1s;
 }
 
 .cinematic-grain {
@@ -188,10 +185,7 @@ body {
     background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.5) 100%);
 }
 
-.tunnel-vignette {
-    position: absolute; inset: 0; z-index: 5; pointer-events: none;
-    box-shadow: inset 0 0 200px 80px var(--color-3);
-}
+/* .tunnel-vignette removed for sharper transitions */
 
 .polaroid-cam {
     position: absolute; inset: 0; width: 100%; height: 100%;
@@ -283,7 +277,7 @@ body {
     position: relative; height: 100vh; width: 100vw;
     display: flex; align-items: center; justify-content: center;
     overflow: hidden; pointer-events: none;
-    background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.3) 100%);
+    background: var(--color-3); /* Removed radial-gradient */
 }
 
 .quote-wrapper {
@@ -315,11 +309,7 @@ body {
     z-index: 10; overflow: hidden;
 }
 
-.horizon-glow {
-    position: absolute; inset: 0; z-index: -1;
-    background: radial-gradient(circle at 50% 60%, rgba(251, 191, 36, 0.3) 0%, transparent 70%);
-    opacity: 0; mix-blend-mode: screen;
-}
+/* .horizon-glow removed for sharper transitions */
 
 .final-quote-container {
     text-align: center; max-width: 1400px; padding: 0 2rem;

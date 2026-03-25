@@ -105,14 +105,27 @@ animateCanvas();
 /* =========================================
    4. GLOBAL COLOR SHIFT (Blue to Warm Festivity)
    ========================================= */
-gsap.to(":root", {
-    "--color-1": "#ea580c", 
-    "--color-2": "#f59e0b", 
-    "--color-3": "#431407", 
-    ease: "none",
-    scrollTrigger: {
-        trigger: "body", start: "top top", end: "bottom bottom", scrub: true
-    }
+/* =========================================
+   4. GLOBAL COLOR SHIFT (Instant "Cuts")
+   ========================================= */
+const setColors = (c1, c2, c3) => {
+    gsap.set(":root", { "--color-1": c1, "--color-2": c2, "--color-3": c3 });
+};
+
+// Act 1: Initial (Blue/Deep)
+setColors("#1e3a8a", "#3b82f6", "#0f172a");
+
+// Cuts based on scroll position
+ScrollTrigger.create({
+    trigger: "#polaroidScene", start: "top 50%",
+    onEnter: () => setColors("#6d28d9", "#8b5cf6", "#1e1b4b"), // Purple Transition
+    onLeaveBack: () => setColors("#1e3a8a", "#3b82f6", "#0f172a")
+});
+
+ScrollTrigger.create({
+    trigger: "#impactScene", start: "top 50%",
+    onEnter: () => setColors("#ea580c", "#f59e0b", "#431407"), // Warm/Orange
+    onLeaveBack: () => setColors("#6d28d9", "#8b5cf6", "#1e1b4b")
 });
 
 /* =========================================
@@ -275,7 +288,7 @@ const horizonTl = gsap.timeline({
     }
 });
 
-horizonTl.to("#horizonGlow", { opacity: 1, scale: 1.5, duration: 2 }, 0);
+// horizonTl.to("#horizonGlow", { opacity: 1, scale: 1.5, duration: 2 }, 0); // Removed for sharper transitions
 horizonTl.fromTo(".final-quote-line1", { y: 30, opacity: 0, scale: 0.9 }, { y: 0, opacity: 1, scale: 1, duration: 1 }, 0.2);
 horizonTl.fromTo(".final-quote-line2", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 1 }, 0.6);
 horizonTl.fromTo(".final-quote-line3", { y: 50, opacity: 0, filter: "blur(10px)", rotationX: 10 }, { y: 0, opacity: 1, filter: "blur(0px)", rotationX: 0, duration: 1.5 }, 1.2);
