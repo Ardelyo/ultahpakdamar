@@ -239,23 +239,40 @@ gsap.to(".reveal-word", {
 });
 
 /* =========================================
-   8. ACT 4: LOCKED QUOTES
+   8. ACT 4: INTERACTIVE ENVELOPES
    ========================================= */
+const envelopes = gsap.utils.toArray('.envelope');
 const quotesTl = gsap.timeline({
-    scrollTrigger: { trigger: "#sceneQuotes", start: "top top", end: "+=3500", pin: true, scrub: 1 }
+    scrollTrigger: { trigger: "#sceneQuotes", start: "top top", end: "+=3000", pin: true, scrub: 1 }
 });
-const quotes = gsap.utils.toArray('.quote-item');
 
-quotes.forEach((quote, i) => {
-    // Animasi lebih dramatis (dari bawah memutar sedikit 3D)
-    quotesTl.fromTo(quote, 
-        { opacity: 0, y: 60, rotationX: 20, filter: "blur(15px)", scale: 0.9 },
-        { opacity: 1, y: 0, rotationX: 0, filter: "blur(0px)", scale: 1, duration: 1, ease: "power2.out" }
+envelopes.forEach((env, i) => {
+    // Initial reveal of the envelope
+    quotesTl.fromTo(env, 
+        { opacity: 0, y: 100, rotationX: -30, scale: 0.8 },
+        { opacity: 1, y: 0, rotationX: 0, scale: 1, duration: 1.5, ease: "power3.out" }
     );
-    quotesTl.to({}, { duration: 1.5 }); // Pause
-    if (i !== quotes.length - 1) {
-        quotesTl.to(quote, { opacity: 0, y: -60, filter: "blur(15px)", scale: 1.05, duration: 1, ease: "power2.in" });
+    quotesTl.to({}, { duration: 1 }); // Pause for each envelope
+    if (i !== envelopes.length - 1) {
+        quotesTl.to(env, { opacity: 0, y: -100, scale: 1.1, duration: 1, ease: "power3.in" });
     }
+
+    // Interactive Trigger: Open on Click
+    env.addEventListener('click', () => {
+        const isOpen = env.classList.toggle('is-open');
+        
+        if (isOpen) {
+            // "Physics-based" opening feel
+            gsap.fromTo(env.querySelector('.envelope-card'), 
+                { y: 0, scale: 0.9, opacity: 0 },
+                { y: "-60%", scale: 1.05, opacity: 1, duration: 1.2, ease: "elastic.out(1, 0.75)" }
+            );
+            // Add a little shake to the envelope
+            gsap.to(env, { rotationZ: "random(-2, 2)", duration: 0.1, repeat: 3, yoyo: true });
+        } else {
+            gsap.to(env.querySelector('.envelope-card'), { y: 0, scale: 1, opacity: 0, duration: 0.5, ease: "power2.in" });
+        }
+    });
 });
 
 /* =========================================
