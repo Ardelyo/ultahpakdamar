@@ -313,3 +313,56 @@ horizonTl.fromTo("#finalCredit", { opacity: 0, y: 20 }, { opacity: 1, y: 0, dura
 
 // Pasang event pendeteksi hover kursor
 attachHoverEffects();
+
+/* =========================================
+   10. MUSIC CONTROL LOGIC
+   ========================================= */
+const bgMusic = document.getElementById('bg-music');
+const musicToggle = document.getElementById('music-control');
+const musicText = musicToggle.querySelector('.music-text');
+let isInitialPlay = true;
+
+// Persistence
+const musicState = localStorage.getItem('music_enabled');
+if (musicState === 'false') {
+    bgMusic.muted = true;
+    musicToggle.classList.add('muted');
+    musicText.innerText = "PAUSED";
+}
+
+const togglePlay = () => {
+    if (bgMusic.paused || bgMusic.muted) {
+        bgMusic.muted = false;
+        bgMusic.play().catch(e => console.log("User interaction required"));
+        musicToggle.classList.remove('muted');
+        musicToggle.classList.add('playing');
+        musicText.innerText = "PLAYING";
+        localStorage.setItem('music_enabled', 'true');
+    } else {
+        bgMusic.pause();
+        musicToggle.classList.add('muted');
+        musicToggle.classList.remove('playing');
+        musicText.innerText = "PAUSED";
+        localStorage.setItem('music_enabled', 'false');
+    }
+};
+
+musicToggle.addEventListener('click', togglePlay);
+
+// Autoplay initialization on first interaction
+const initAudio = () => {
+    if (isInitialPlay && localStorage.getItem('music_enabled') !== 'false') {
+        bgMusic.play().then(() => {
+            musicToggle.classList.add('playing');
+            musicText.innerText = "PLAYING";
+        }).catch(e => {
+            console.log("Waiting for user interaction to play audio");
+        });
+        isInitialPlay = false;
+    }
+    window.removeEventListener('scroll', initAudio);
+    window.removeEventListener('click', initAudio);
+};
+
+window.addEventListener('scroll', initAudio);
+window.addEventListener('click', initAudio);
