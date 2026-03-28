@@ -265,7 +265,7 @@ envelopes.forEach((env, i) => {
             // "Physics-based" opening feel
             gsap.fromTo(env.querySelector('.envelope-card'), 
                 { y: 0, scale: 0.9, opacity: 0 },
-                { y: "-60%", scale: 1.05, opacity: 1, duration: 1.2, ease: "elastic.out(1, 0.75)" }
+                { y: "-50%", scale: 1.1, opacity: 1, duration: 1.2, ease: "elastic.out(1, 0.75)" }
             );
             // Add a little shake to the envelope
             gsap.to(env, { rotationZ: "random(-2, 2)", duration: 0.1, repeat: 3, yoyo: true });

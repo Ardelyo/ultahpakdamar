@@ -413,8 +413,52 @@ body {
 }
 
 .card-inner .quote-author {
-    margin-top: 1rem; font-size: 0.7rem; color: var(--color-1);
-    opacity: 1; letter-spacing: 0.1em;
+    display: block;
+    margin-top: 1.5rem; font-size: 0.8rem; color: var(--color-1);
+    opacity: 0.8; letter-spacing: 0.2em;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    padding-top: 1rem;
+}
+
+/* NEW: Letter Content for long messages */
+.letter-content {
+    text-align: left;
+    max-height: 280px; /* Base height for desktop */
+    overflow-y: auto;
+    padding-right: 15px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-2) transparent;
+}
+
+.letter-content::-webkit-scrollbar {
+    width: 4px;
+}
+
+.letter-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.letter-content::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.3);
+    border-radius: 10px;
+}
+
+.letter-content p {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 1.2rem;
+    color: #334155;
+}
+
+.letter-content strong {
+    color: var(--color-1);
+    background: linear-gradient(120deg, rgba(251, 191, 36, 0.2) 0%, rgba(251, 191, 36, 0.2) 100%);
+    background-repeat: no-repeat;
+    background-size: 100% 0.2em;
+    background-position: 0 88%;
+    padding: 0 2px;
 }
 
 /* OPEN STATE */
@@ -424,8 +468,29 @@ body {
 }
 
 .envelope.is-open .envelope-card {
-    transform: translateY(-60%) scale(1.05);
+    transform: translateY(-50%) scale(1.1);
     z-index: 5;
+    height: auto;
+    min-height: 350px;
+    max-height: 80vh;
+}
+
+@media screen and (max-width: 768px) {
+    .envelope.is-open .envelope-card {
+        transform: translateY(-45%) scale(1.02);
+        width: 85vw;
+        left: 2.5vw;
+        max-height: 70vh;
+    }
+    
+    .letter-content {
+        max-height: 50vh;
+        padding-right: 10px;
+    }
+    
+    .letter-content p {
+        font-size: 0.95rem;
+    }
 }
 
 .envelope:hover {
