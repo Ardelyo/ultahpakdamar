@@ -433,6 +433,7 @@ body {
     overflow-y: auto;
     overflow-x: hidden;
     padding-right: 15px;
+    padding-bottom: 2rem;
     scrollbar-width: thin;
     scrollbar-color: var(--color-2) transparent;
     -webkit-overflow-scrolling: touch; /* Better mobile scrolling */
@@ -476,8 +477,18 @@ body {
 .envelope.is-open .envelope-card {
     transform: translateY(-50%) scale(1.1);
     z-index: 10;
-    height: 480px; /* Fixed height when open to ensure scrolling works consistently */
+    height: 520px; /* Increased height for better reading area */
     max-height: 80vh;
+}
+
+@media screen and (max-width: 768px) {
+    .envelope.is-open .envelope-card {
+        transform: translateY(-45%) scale(1.02);
+        width: 85vw;
+        left: 2.5vw;
+        height: 60vh; /* Fixed height on mobile as well for stability */
+        max-height: 70vh;
+    }
 }
 
 @media screen and (max-width: 768px) {
