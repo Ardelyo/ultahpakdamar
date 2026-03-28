@@ -396,13 +396,19 @@ body {
 }
 
 .envelope-card {
-    position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px;
-    background: white; border-radius: 2px;
-    padding: 20px; z-index: 1;
+    position: absolute; 
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    width: calc(100% - 20px);
+    height: calc(100% - 20px);
+    background: white; border-radius: 4px;
+    padding: 24px; z-index: 1;
     display: flex; align-items: stretch; justify-content: center;
-    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s, top 0.6s, height 0.6s;
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    overflow: hidden; /* Prevent content from leaking outside the card boundary */
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
 }
 
 .card-inner {
@@ -475,19 +481,21 @@ body {
 }
 
 .envelope.is-open .envelope-card {
-    transform: translateY(-50%) scale(1.1);
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, -85%) scale(1.1); /* Lift up more to show content */
     z-index: 10;
-    height: 520px; /* Increased height for better reading area */
+    height: 550px; /* Reliable fixed height for scrolling */
     max-height: 80vh;
 }
 
 @media screen and (max-width: 768px) {
     .envelope.is-open .envelope-card {
-        transform: translateY(-45%) scale(1.02);
-        width: 85vw;
-        left: 2.5vw;
-        height: 60vh; /* Fixed height on mobile as well for stability */
-        max-height: 70vh;
+        transform: translate(-50%, -75%) scale(1.02);
+        width: 90vw;
+        height: 65vh;
+        max-height: 75vh;
+        padding: 20px;
     }
 }
 

@@ -267,15 +267,15 @@ envelopes.forEach((env, i) => {
         const isOpen = env.classList.toggle('is-open');
         
         if (isOpen) {
-            // "Physics-based" opening feel
+            // Initial animation pop, then let CSS handle the rest
             gsap.fromTo(env.querySelector('.envelope-card'), 
-                { y: 0, scale: 0.9, opacity: 0 },
-                { y: "-50%", scale: 1.1, opacity: 1, duration: 1.2, ease: "elastic.out(1, 0.75)" }
+                { opacity: 0, scale: 0.8 },
+                { opacity: 1, scale: 1.1, duration: 1.2, ease: "elastic.out(1, 0.75)" }
             );
             // Add a little shake to the envelope
             gsap.to(env, { rotationZ: "random(-2, 2)", duration: 0.1, repeat: 3, yoyo: true });
         } else {
-            gsap.to(env.querySelector('.envelope-card'), { y: 0, scale: 1, opacity: 0, duration: 0.5, ease: "power2.in", clearProps: "height" });
+            gsap.to(env.querySelector('.envelope-card'), { opacity: 0, scale: 0.9, duration: 0.5, ease: "power2.in" });
         }
     });
 });
