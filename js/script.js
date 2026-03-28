@@ -258,7 +258,12 @@ envelopes.forEach((env, i) => {
     }
 
     // Interactive Trigger: Open on Click
-    env.addEventListener('click', () => {
+    env.addEventListener('click', (e) => {
+        // If clicking inside the card when it's open, don't toggle (unless clicking a close button, but we don't have one)
+        if (env.classList.contains('is-open') && e.target.closest('.letter-content')) {
+            return;
+        }
+
         const isOpen = env.classList.toggle('is-open');
         
         if (isOpen) {
@@ -270,7 +275,7 @@ envelopes.forEach((env, i) => {
             // Add a little shake to the envelope
             gsap.to(env, { rotationZ: "random(-2, 2)", duration: 0.1, repeat: 3, yoyo: true });
         } else {
-            gsap.to(env.querySelector('.envelope-card'), { y: 0, scale: 1, opacity: 0, duration: 0.5, ease: "power2.in" });
+            gsap.to(env.querySelector('.envelope-card'), { y: 0, scale: 1, opacity: 0, duration: 0.5, ease: "power2.in", clearProps: "height" });
         }
     });
 });
