@@ -191,13 +191,13 @@ rushTl.to("#polaroidBgText", { z: -1000, scale: 1.2, opacity: 0.1, ease: "none" 
 
 polaroids.forEach((p, i) => {
     const isMobile = window.innerWidth < 768;
-    const xSpread = isMobile ? window.innerWidth * 0.4 : window.innerWidth * 0.7;
-    const ySpread = isMobile ? window.innerHeight * 0.6 : window.innerHeight * 0.5;
+    const xSpread = isMobile ? window.innerWidth * 0.35 : window.innerWidth * 0.7;
+    const ySpread = isMobile ? window.innerHeight * 0.5 : window.innerHeight * 0.5;
     
     const xPos = gsap.utils.random(-xSpread, xSpread);
     const yPos = gsap.utils.random(-ySpread, ySpread);
-    const startZ = gsap.utils.random(-5000, -3000); 
-    const endZ = isMobile ? 1800 : 1200; // Fly further past camera on mobile
+    const startZ = isMobile ? gsap.utils.random(-3000, -1500) : gsap.utils.random(-5000, -3000); 
+    const endZ = isMobile ? 1500 : 1200; // Fly further past camera on mobile
     const rot = gsap.utils.random(-30, 30);
 
     // Simpan variabel state awal via custom attribute
@@ -269,8 +269,8 @@ envelopes.forEach((env, i) => {
         if (isOpen) {
             // Initial animation pop, then let CSS handle the rest
             gsap.fromTo(env.querySelector('.envelope-card'), 
-                { opacity: 0, scale: 0.8 },
-                { opacity: 1, scale: 1.1, duration: 1.2, ease: "elastic.out(1, 0.75)" }
+                { opacity: 0, scale: 0.8, y: 50 },
+                { opacity: 1, scale: 1, y: 0, duration: 1.2, ease: "elastic.out(1, 0.75)" }
             );
             // Add a little shake to the envelope
             gsap.to(env, { rotationZ: "random(-2, 2)", duration: 0.1, repeat: 3, yoyo: true });
