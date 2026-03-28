@@ -416,6 +416,8 @@ body {
     width: 100%;
     display: flex;
     flex-direction: column;
+    height: 100%;
+    justify-content: center; /* Center content vertically for short cards */
 }
 
 .card-inner p {
@@ -435,14 +437,18 @@ body {
 /* NEW: Letter Content for long messages */
 .letter-content {
     text-align: left;
-    flex-grow: 1;
+    flex-grow: 0; /* Don't grow by default */
     overflow-y: auto;
     overflow-x: hidden;
     padding-right: 15px;
-    padding-bottom: 2rem;
+    padding-bottom: 1rem;
     scrollbar-width: thin;
     scrollbar-color: var(--color-2) transparent;
-    -webkit-overflow-scrolling: touch; /* Better mobile scrolling */
+    -webkit-overflow-scrolling: touch;
+}
+
+.envelope--long .letter-content {
+    flex-grow: 1; /* Grow only for long cards */
 }
 
 .letter-content::-webkit-scrollbar {
@@ -483,19 +489,31 @@ body {
 .envelope.is-open .envelope-card {
     opacity: 1;
     pointer-events: auto;
-    transform: translate(-50%, -85%) scale(1.1); /* Lift up more to show content */
+    transform: translate(-50%, -75%) scale(1.1);
     z-index: 10;
-    height: 550px; /* Reliable fixed height for scrolling */
-    max-height: 80vh;
+    height: auto;
+    min-height: 200px;
+    max-height: 85vh;
+}
+
+.envelope--long.is-open .envelope-card {
+    height: 550px; /* Fixed height ONLY for the long message */
+    transform: translate(-50%, -85%) scale(1.1);
 }
 
 @media screen and (max-width: 768px) {
     .envelope.is-open .envelope-card {
-        transform: translate(-50%, -75%) scale(1.02);
+        transform: translate(-50%, -65%) scale(1.02);
         width: 90vw;
-        height: 65vh;
+        height: auto;
+        min-height: 180px;
         max-height: 75vh;
         padding: 20px;
+    }
+    
+    .envelope--long.is-open .envelope-card {
+        transform: translate(-50%, -75%) scale(1.02);
+        height: 65vh;
     }
 }
 

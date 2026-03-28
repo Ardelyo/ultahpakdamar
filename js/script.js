@@ -275,7 +275,11 @@ envelopes.forEach((env, i) => {
             // Add a little shake to the envelope
             gsap.to(env, { rotationZ: "random(-2, 2)", duration: 0.1, repeat: 3, yoyo: true });
         } else {
-            gsap.to(env.querySelector('.envelope-card'), { opacity: 0, scale: 0.9, duration: 0.5, ease: "power2.in" });
+            const card = env.querySelector('.envelope-card');
+            gsap.to(card, { opacity: 0, scale: 0.9, duration: 0.5, ease: "power2.in", onComplete: () => {
+                const scrollArea = card.querySelector('.letter-content');
+                if (scrollArea) scrollArea.scrollTop = 0;
+            }});
         }
     });
 });
