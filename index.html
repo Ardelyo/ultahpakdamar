@@ -22,21 +22,33 @@
         <source src="assets/audio/birthday_song.mp3" type="audio/mpeg">
     </audio>
 
-    <!-- MUSIC CONTROL -->
-    <button id="music-control" class="music-control interactive-hover" aria-label="Toggle Music">
-        <div class="music-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path class="speaker" d="M11 5L6 9H2v6h4l5 4V5z"></path>
-                <path class="wave wave-1" d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-                <path class="wave wave-2" d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
-            </svg>
-        </div>
-        <span class="music-text">PLAY MIRACLE</span>
-    </button>
+    <!-- MUSIC & AUTOPLAY CONTROL -->
+    <div class="controls-wrapper">
+        <button id="autoplay-control" class="music-control interactive-hover" aria-label="Toggle Autoplay">
+            <div class="music-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+            </div>
+            <span class="music-text">CINEMATIC MODE</span>
+        </button>
+
+        <button id="music-control" class="music-control interactive-hover" aria-label="Toggle Music">
+            <div class="music-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path class="speaker" d="M11 5L6 9H2v6h4l5 4V5z"></path>
+                    <path class="wave wave-1" d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    <path class="wave wave-2" d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                </svg>
+            </div>
+            <span class="music-text">PLAY MIRACLE</span>
+        </button>
+    </div>
 
     <!-- INTERACTIVE BACKGROUND ELEMENTS -->
     <canvas id="magic-dust"></canvas>
     <div id="fluid-canvas"></div>
+    <canvas id="star-field"></canvas>
     <div class="cinematic-grain"></div>
 
     <!-- CUSTOM CURSOR -->
@@ -52,10 +64,15 @@
                     <defs>
                         <mask id="text-portal">
                             <rect width="100%" height="100%" fill="white" />
-                            <text x="50%" y="55%" text-anchor="middle" dominant-baseline="middle" 
+                            <text x="50%" y="45%" text-anchor="middle" dominant-baseline="middle" 
                                   font-family="'Instrument Serif', serif" font-size="200" font-weight="400" 
                                   letter-spacing="-2" fill="black" class="interactive-hover">
-                                PAK DAMAR
+                                PAK
+                            </text>
+                            <text x="50%" y="65%" text-anchor="middle" dominant-baseline="middle" 
+                                  font-family="'Instrument Serif', serif" font-size="200" font-weight="400" 
+                                  letter-spacing="-2" fill="black" class="interactive-hover">
+                                DAMAR
                             </text>
                         </mask>
                     </defs>
@@ -127,6 +144,17 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Mobile Interaction Hint -->
+            <div class="mobile-hint" id="mobileHint">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M15 18l-6-6 6-6"></path>
+                </svg>
+                <span>KLIK SURATNYA</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6"></path>
+                </svg>
+            </div>
         </div>
         </section>
 
@@ -148,6 +176,7 @@
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
     <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 

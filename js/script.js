@@ -4,10 +4,11 @@ gsap.registerPlugin(ScrollTrigger);
    1. SMOOTH SCROLL (Lenis)
    ========================================= */
 const lenis = new Lenis({
-    duration: 1.5, 
+    duration: 1.8, 
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-    wheelMultiplier: 1,
-    touchMultiplier: 2
+    wheelMultiplier: 0.9,
+    touchMultiplier: 1.5,
+    infinite: false,
 });
 lenis.on('scroll', ScrollTrigger.update);
 gsap.ticker.add((time) => { lenis.raf(time * 1000) });
@@ -103,6 +104,51 @@ function animateCanvas() {
 animateCanvas();
 
 /* =========================================
+   3.1 STAR FIELD (Act 5)
+   ========================================= */
+const starField = document.getElementById('star-field');
+const sCtx = starField.getContext('2d');
+let stars = [];
+
+function resizeStars() {
+    starField.width = window.innerWidth;
+    starField.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeStars);
+resizeStars();
+
+class Star {
+    constructor() {
+        this.reset();
+    }
+    reset() {
+        this.x = Math.random() * starField.width;
+        this.y = Math.random() * starField.height;
+        this.size = Math.random() * 1.5;
+        this.alpha = 0;
+        this.maxAlpha = Math.random() * 0.8 + 0.2;
+        this.speed = Math.random() * 0.02 + 0.01;
+    }
+    draw() {
+        sCtx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
+        sCtx.beginPath();
+        sCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        sCtx.fill();
+        this.alpha += this.speed;
+        if (this.alpha > this.maxAlpha || this.alpha < 0) this.speed *= -1;
+    }
+}
+
+for (let i = 0; i < 150; i++) stars.push(new Star());
+
+function animateStars() {
+    sCtx.clearRect(0, 0, starField.width, starField.height);
+    stars.forEach(s => s.draw());
+    requestAnimationFrame(animateStars);
+}
+animateStars();
+
+/* =========================================
    4. GLOBAL COLOR SHIFT (Blue to Warm Festivity)
    ========================================= */
 /* =========================================
@@ -114,6 +160,9 @@ const setColors = (c1, c2, c3) => {
 
 // Act 1: Initial (Blue/Deep)
 setColors("#1e3a8a", "#3b82f6", "#0f172a");
+
+// Initialize all scenes to visible with correct initial opacity to prevent "disappearing" bug
+gsap.set(["#gateway", "#polaroidScene", "#impactScene", "#sceneQuotes", "#horizon"], { opacity: 1, visibility: "visible" });
 
 // Cuts based on scroll position
 ScrollTrigger.create({
@@ -137,7 +186,19 @@ const gatewayTl = gsap.timeline({
     }
 });
 gatewayTl.to("#gatewaySubtitle", { opacity: 0, y: -20, duration: 0.5 }, 0);
-gatewayTl.to("#maskWrapper", { scale: 300, ease: "power2.in", duration: 4 }, 0);
+gatewayTl.to("#maskWrapper", { 
+    scale: 300, 
+    ease: "power2.in", 
+    duration: 4 
+}, 0);
+// Blast through effect
+gatewayTl.to("#gateway", { 
+    opacity: 0, 
+    scale: 1.2, 
+    duration: 1.5, 
+    ease: "power2.inOut",
+    pointerEvents: "none" // Allow interacting with underlying layers
+}, 3.5);
 gatewayTl.to(".svg-mask", { opacity: 0, duration: 0.2 }, 3.8);
 
 /* =========================================
@@ -233,10 +294,31 @@ words.forEach(word => {
     revealTextEl.appendChild(span);
 });
 
-gsap.to(".reveal-word", {
-    color: "#FFFFFF", textShadow: "0 0 20px rgba(255,255,255,0.4)", stagger: 0.1,
-    scrollTrigger: { trigger: "#impactScene", start: "top 60%", end: "bottom 80%", scrub: 1 }
+// Cinematic Reveal: Blur to Focus + Slowdown
+const impactWords = gsap.utils.toArray(".reveal-word");
+const impactTl = gsap.timeline({
+    scrollTrigger: { 
+        trigger: "#impactScene", 
+        start: "top top", 
+        end: "+=3000", // Extra long for reading speed
+        pin: true, 
+        scrub: 1 
+    }
 });
+
+impactTl.fromTo(impactWords, 
+    { opacity: 0, filter: "blur(20px)", scale: 0.8 },
+    { opacity: 1, filter: "blur(0px)", scale: 1.0, duration: 1, stagger: 0.2, ease: "power2.out", immediateRender: false }
+);
+
+// Highlighting words color shift later in the timeline
+impactTl.to(".reveal-word.highlight", {
+    color: "#FBBF24",
+    textShadow: "0 0 30px rgba(251, 191, 36, 0.6)",
+    fontWeight: 700,
+    duration: 1,
+    stagger: 0.1
+}, "-=0.5");
 
 /* =========================================
    8. ACT 4: INTERACTIVE ENVELOPES
@@ -247,10 +329,10 @@ const quotesTl = gsap.timeline({
 });
 
 envelopes.forEach((env, i) => {
-    // Initial reveal of the envelope
+    // Initial reveal of the envelope - cascading
     quotesTl.fromTo(env, 
-        { opacity: 0, y: 100, rotationX: -30, scale: 0.8 },
-        { opacity: 1, y: 0, rotationX: 0, scale: 1, duration: 1.5, ease: "power3.out" }
+        { opacity: 0, y: 150, z: -500, rotationX: -45, scale: 0.8 },
+        { opacity: 1, y: 0, z: 0, rotationX: 0, scale: 1, duration: 2, ease: "expo.out" }
     );
     quotesTl.to({}, { duration: 1 }); // Pause for each envelope
     if (i !== envelopes.length - 1) {
@@ -265,6 +347,12 @@ envelopes.forEach((env, i) => {
         }
 
         const isOpen = env.classList.toggle('is-open');
+        
+        // Hide mobile hint after first interaction
+        const mobileHint = document.getElementById('mobileHint');
+        if (mobileHint) {
+            gsap.to(mobileHint, { opacity: 0, duration: 0.5, onComplete: () => mobileHint.style.display = 'none' });
+        }
         
         if (isOpen) {
             // Initial animation pop, then let CSS handle the rest
@@ -315,10 +403,18 @@ const horizonTl = gsap.timeline({
 });
 
 // horizonTl.to("#horizonGlow", { opacity: 1, scale: 1.5, duration: 2 }, 0); // Removed for sharper transitions
-horizonTl.fromTo(".final-quote-line1", { y: 30, opacity: 0, scale: 0.9 }, { y: 0, opacity: 1, scale: 1, duration: 1 }, 0.2);
-horizonTl.fromTo(".final-quote-line2", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 1 }, 0.6);
-horizonTl.fromTo(".final-quote-line3", { y: 50, opacity: 0, filter: "blur(10px)", rotationX: 10 }, { y: 0, opacity: 1, filter: "blur(0px)", rotationX: 0, duration: 1.5 }, 1.2);
-horizonTl.fromTo("#finalCredit", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 1 }, 2.5);
+horizonTl.fromTo(".final-quote-line1", { y: 50, opacity: 0, scale: 0.9 }, { y: 0, opacity: 1, scale: 1, duration: 1.5, ease: "back.out(1.7)" }, 0.2);
+horizonTl.fromTo(".final-quote-line2", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 1 }, 0.8);
+horizonTl.fromTo(".final-quote-line3", { y: 80, opacity: 0, filter: "blur(20px)", rotationX: 20 }, { y: 0, opacity: 1, filter: "blur(0px)", rotationX: 0, duration: 2, ease: "power4.out" }, 1.4);
+horizonTl.fromTo("#finalCredit", { opacity: 0, y: 30, letterSpacing: "1em" }, { opacity: 1, y: 0, letterSpacing: "0.3em", duration: 2, ease: "power2.out" }, 3);
+
+// Star Field Activation Trigger
+ScrollTrigger.create({
+    trigger: "#horizon",
+    start: "top 20%",
+    onEnter: () => document.body.classList.add('show-stars'),
+    onLeaveBack: () => document.body.classList.remove('show-stars')
+});
 
 // Pasang event pendeteksi hover kursor
 attachHoverEffects();
@@ -375,3 +471,120 @@ const initAudio = () => {
 
 window.addEventListener('scroll', initAudio);
 window.addEventListener('click', initAudio);
+
+/* =========================================
+   11. CINEMATIC AUTOPLAY ENGINE
+   ========================================= */
+const autoplayToggle = document.getElementById('autoplay-control');
+const autoplayText = autoplayToggle.querySelector('.music-text');
+let isAutoplay = false;
+let autoplayTimeline = null;
+
+const stopAutoplay = () => {
+    isAutoplay = false;
+    autoplayToggle.classList.remove('active');
+    autoplayText.innerText = "CINEMATIC MODE";
+    if (autoplayTimeline) {
+        autoplayTimeline.kill();
+        autoplayTimeline = null;
+    }
+    // Close any open envelopes
+    const openEnvelopes = document.querySelectorAll('.envelope.is-open');
+    openEnvelopes.forEach(env => {
+        env.classList.remove('is-open');
+        const card = env.querySelector('.envelope-card');
+        if (card) gsap.set(card, { opacity: 0, scale: 0.9, y: 50 });
+    });
+    lenis.start();
+};
+
+const startAutoplay = () => {
+    isAutoplay = true;
+    autoplayToggle.classList.add('active');
+    autoplayText.innerText = "PLAYING TOUR";
+    lenis.stop(); // Stop manual scrolling
+    
+    // Ensure music is playing
+    if (bgMusic.paused) togglePlay();
+
+    autoplayTimeline = gsap.timeline({
+        onComplete: stopAutoplay
+    });
+
+    // 1. Initial Scroll to Top
+    autoplayTimeline.to(window, {
+        duration: 2,
+        scrollTo: { y: 0, autoKill: false },
+        ease: "power2.inOut"
+    });
+
+    // 2. Section Sequence: Gateway -> Polaroid -> Impact -> Quotes
+    
+    // Progress to Polaroid (Act 2)
+    autoplayTimeline.to(window, {
+        scrollTo: { y: "#polaroidScene", autoKill: false },
+        duration: 8,
+        ease: "none"
+    }, "+=1");
+
+    // Through Polaroid to Impact (Act 3)
+    autoplayTimeline.to(window, {
+        scrollTo: { y: "#impactScene", autoKill: false },
+        duration: 10,
+        ease: "none"
+    }, "+=1");
+
+    // Through Impact to Quote (Act 4)
+    autoplayTimeline.to(window, {
+        scrollTo: { y: "#sceneQuotes", autoKill: false },
+        duration: 12,
+        ease: "none"
+    }, "+=1");
+
+    // 3. Envelope Interaction Sequence
+    envelopes.forEach((env, i) => {
+        autoplayTimeline.add(() => {
+            env.click(); // Open envelope
+        }, "+=1");
+
+        // If it's a long letter, scroll its content
+        const scrollArea = env.querySelector('.letter-content');
+        if (scrollArea && env.classList.contains('envelope--long')) {
+            autoplayTimeline.to(scrollArea, {
+                scrollTop: scrollArea.scrollHeight - scrollArea.clientHeight,
+                duration: 15, // Smooth reading speed
+                ease: "none"
+            }, "+=2");
+        } else {
+            autoplayTimeline.to({}, { duration: 5 }); // Wait for short letter
+        }
+
+        autoplayTimeline.add(() => {
+            env.click(); // Close envelope
+        }, "+=2");
+    });
+
+    // 4. Final Scroll to Credits
+    autoplayTimeline.to(window, {
+        scrollTo: { y: "#horizon", autoKill: false },
+        duration: 10,
+        ease: "none"
+    }, "+=1");
+};
+
+autoplayToggle.addEventListener('click', () => {
+    if (isAutoplay) stopAutoplay();
+    else startAutoplay();
+});
+
+// Manual Override: Stop if user interacts
+const handleManualInteraction = () => {
+    if (isAutoplay) {
+        console.log("Manual interaction detected, stopping autoplay...");
+        stopAutoplay();
+    }
+};
+
+window.addEventListener('wheel', handleManualInteraction, { passive: true });
+window.addEventListener('touchstart', handleManualInteraction, { passive: true });
+window.addEventListener('keydown', handleManualInteraction, { passive: true });
