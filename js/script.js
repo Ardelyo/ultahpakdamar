@@ -197,13 +197,13 @@ const gatewayTl = gsap.timeline({
     }
 });
 
-// INITIAL SETTINGS - Ensure absolute visibility
-gsap.set(portalText, { scale: 1, opacity: 1, color: "#ffffff", visibility: "visible", zIndex: 10 });
-gsap.set("#gateway", { opacity: 1, visibility: "visible", zIndex: 100 });
+// INITIAL SETTINGS
+gsap.set(portalText, { scale: 1, opacity: 1, visibility: "visible" });
+gsap.set("#gateway", { opacity: 1, visibility: "visible" });
 
 gatewayTl.to("#gatewaySubtitle", { opacity: 0, y: -20, duration: 0.5 }, 0);
 gatewayTl.to(portalText, { 
-    scale: 100, 
+    scale: 80, 
     opacity: 0,
     ease: "power2.in", 
     duration: 5 
@@ -517,14 +517,19 @@ window.addEventListener('click', initAudio, { passive: true });
 window.addEventListener('touchstart', initAudio, { passive: true });
 
 /* =========================================
-   11. CINEMATIC AUTOPLAY ENGINE
+   11. CINEMATIC AUTOPLAY ENGINE (Independent System)
    ========================================= */
 const autoplayToggle = document.getElementById('autoplay-control');
 const autoplayText = autoplayToggle.querySelector('.music-text');
 let isAutoplay = false;
 let autoplayTimeline = null;
+let autoplayStarting = false; // Brief guard to prevent instant-kill on button tap
+
+// Proxy object to drive scroll position without fighting ScrollTrigger
+const scrollProxy = { y: 0 };
 
 const stopAutoplay = () => {
+    if (!isAutoplay) return;
     isAutoplay = false;
     autoplayToggle.classList.remove('active');
     autoplayText.innerText = "CINEMATIC MODE";
@@ -533,11 +538,8 @@ const stopAutoplay = () => {
         autoplayTimeline = null;
     }
     // Close any open envelopes
-    const openEnvelopes = document.querySelectorAll('.envelope.is-open');
-    openEnvelopes.forEach(env => {
-        env.classList.remove('is-open');
-        const card = env.querySelector('.envelope-card');
-        if (card) gsap.set(card, { opacity: 0, scale: 0.9, y: 50 });
+    document.querySelectorAll('.envelope.autoplay-active, .envelope.is-open').forEach(env => {
+        env.classList.remove('autoplay-active', 'is-open');
     });
     lenis.start();
 };
@@ -545,73 +547,77 @@ const stopAutoplay = () => {
 const startAutoplay = () => {
     isAutoplay = true;
     autoplayToggle.classList.add('active');
-    autoplayText.innerText = "PLAYING TOUR";
-    lenis.stop(); // Stop manual scrolling
-    
-    // Ensure music is playing
+    autoplayText.innerText = "PLAYING TOUR...";
+    lenis.stop();
+
+    // Start music
     if (bgMusic.paused) togglePlay();
 
-    blockInteraction = true;
-    setTimeout(() => { blockInteraction = false; }, 2000);
+    // Reset scroll to top first (instant)
+    window.scrollTo(0, 0);
+    ScrollTrigger.update();
+    scrollProxy.y = 0;
 
-    // RESET TO TOP FIRST
-    gsap.to(window, { scrollTo: 0, duration: 0.5 });
+    // Brief guard: prevent touch/wheel events in first 1.5s from killing autoplay
+    autoplayStarting = true;
+    setTimeout(() => { autoplayStarting = false; }, 1500);
 
-    autoplayTimeline = gsap.timeline({
-        onComplete: stopAutoplay
-    });
+    // Get scroll end positions from ScrollTrigger instances
+    // Each ScrollTrigger has .start and .end as absolute scroll positions
+    const allTriggers = ScrollTrigger.getAll();
+    const gatewayEnd   = allTriggers.find(t => t.trigger && t.trigger.id === "gateway")?.end        || window.innerHeight * 2.5;
+    const polaroidEnd  = allTriggers.find(t => t.trigger && t.trigger.id === "polaroidScene")?.end  || gatewayEnd  + 3500;
+    const impactEnd    = allTriggers.find(t => t.trigger && t.trigger.id === "impactScene")?.end    || polaroidEnd + 3500;
+    const quotesStart  = allTriggers.find(t => t.trigger && t.trigger.id === "sceneQuotes")?.start  || impactEnd   + 100;
+    const quotesEnd    = allTriggers.find(t => t.trigger && t.trigger.id === "sceneQuotes")?.end    || quotesStart + 3500;
+    const horizonStart = allTriggers.find(t => t.trigger && t.trigger.id === "horizon")?.start      || quotesEnd   + 100;
 
-    // 1. Initial State Sync
-    autoplayTimeline.add(() => {
-        gsap.set(".scene-gateway, .scene-polaroid, .scene-impact, .scene-quotes, .scene-horizon", { 
-            visibility: "visible", 
-            opacity: 1 
+    console.log("[Autoplay] Scroll targets:", { gatewayEnd, polaroidEnd, impactEnd, quotesStart, quotesEnd, horizonStart });
+
+    // Helper: scroll to a position over a duration using window.scrollTo each frame
+    const scrollTo = (targetY, duration, ease = "power2.inOut") => {
+        return gsap.to(scrollProxy, {
+            y: targetY,
+            duration,
+            ease,
+            onUpdate: () => {
+                window.scrollTo(0, Math.round(scrollProxy.y));
+                ScrollTrigger.update();
+            }
         });
-        envelopes.forEach(e => e.classList.remove('autoplay-active', 'is-open'));
-    });
+    };
 
-    // 2. Drive Timelines Independently
-    // Using pause() on ScrollTrigger might be risky, so we just drive the timelines
-    // and rely on autoAlpha to hide the previous sections.
-    
-    // GATEWAY
-    autoplayTimeline.to(gatewayTl, { progress: 1, duration: 6, ease: "power1.inOut" });
+    autoplayTimeline = gsap.timeline({ onComplete: stopAutoplay });
 
-    // POLAROID
-    autoplayTimeline.to(rushTl, { progress: 1, duration: 12, ease: "none" }, "+=0.5");
+    // ── ACT 1: Gateway ── scroll through the portal
+    autoplayTimeline.add(scrollTo(gatewayEnd, 5, "power2.in"));
 
-    // IMPACT
-    autoplayTimeline.to(impactTl, { progress: 1, duration: 10, ease: "none" }, "+=0.5");
+    // ── ACT 2: Polaroid Rush ── scroll through all photos
+    autoplayTimeline.add(scrollTo(polaroidEnd, 10, "none"), "+=0.2");
 
-    // ENVELOPES
+    // ── ACT 3: Impact Text ── scroll through the words slowly
+    autoplayTimeline.add(scrollTo(impactEnd, 10, "none"), "+=0.2");
+
+    // ── ACT 4: Envelopes ── reveal each one + open/close ──
+    const envCount = envelopes.length;
     envelopes.forEach((env, i) => {
-        autoplayTimeline.to(quotesTl, { progress: (i + 1) / envelopes.length, duration: 4, ease: "power2.inOut" }, "+=1");
-        
-        autoplayTimeline.add(() => {
-            env.classList.add('autoplay-active');
-        }, "+=0.5");
+        // Scroll to the point in quotes timeline where this envelope is visible
+        const envScrollPos = quotesStart + ((i / envCount) * (quotesEnd - quotesStart));
+        autoplayTimeline.add(scrollTo(envScrollPos, 2.5, "power2.inOut"), "+=0.3");
 
-        autoplayTimeline.to({}, { duration: 2 }); 
+        // Open the envelope
+        autoplayTimeline.add(() => { env.classList.add('autoplay-active'); }, "+=0.4");
 
-        const scrollArea = env.querySelector('.letter-content');
-        if (scrollArea && env.classList.contains('envelope--long')) {
-            autoplayTimeline.to(scrollArea, {
-                scrollTop: scrollArea.scrollHeight - scrollArea.clientHeight,
-                duration: 12,
-                ease: "none"
-            }, "+=0.5");
-            autoplayTimeline.to({}, { duration: 2 }); 
-        } else {
-            autoplayTimeline.to({}, { duration: 5 }); 
-        }
+        // For the long envelope, wait longer
+        const readTime = env.classList.contains('envelope--long') ? 12 : 5;
+        autoplayTimeline.to({}, { duration: readTime });
 
-        autoplayTimeline.add(() => {
-            env.classList.remove('autoplay-active');
-        }, "+=0.5");
+        // Close the envelope
+        autoplayTimeline.add(() => { env.classList.remove('autoplay-active'); }, "+=0.3");
     });
 
-    // HORIZON
-    autoplayTimeline.to(horizonTl, { progress: 1, duration: 6, ease: "power1.out" }, "+=1");
+    // ── ACT 5: Final Celebration ──
+    autoplayTimeline.add(scrollTo(horizonStart + window.innerHeight, 6, "power1.out"), "+=0.5");
 };
 
 autoplayToggle.addEventListener('click', () => {
@@ -619,15 +625,7 @@ autoplayToggle.addEventListener('click', () => {
     else startAutoplay();
 });
 
-// Manual Override: Stop if user interacts (Wait for 2s after start to prevent accidental kills)
-let blockInteraction = false;
-const handleManualInteraction = () => {
-    if (isAutoplay && !blockInteraction) {
-        console.log("Manual interaction detected, stopping autoplay...");
-        stopAutoplay();
-    }
-};
-
-window.addEventListener('wheel', handleManualInteraction, { passive: true });
-window.addEventListener('touchstart', handleManualInteraction, { passive: true });
-window.addEventListener('keydown', handleManualInteraction, { passive: true });
+// Manual Override: Stop if user physically scrolls (but not if autoplay is programmatically scrolling)
+window.addEventListener('wheel',      () => { if (isAutoplay) stopAutoplay(); }, { passive: true });
+window.addEventListener('keydown',    (e) => { if (isAutoplay && ['ArrowDown','ArrowUp','PageDown','PageUp',' '].includes(e.key)) stopAutoplay(); }, { passive: true });
+window.addEventListener('touchstart', () => { if (isAutoplay) stopAutoplay(); }, { passive: true });
