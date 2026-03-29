@@ -203,19 +203,20 @@ const gatewayTl = gsap.timeline({
 gsap.set("#maskWrapper", { transformOrigin: "50% 50%", scale: 1 });
 gsap.set("#gateway text", { transformOrigin: "50% 50%" });
 
+// Acts are placed closer to each other to prevent "blank" space
 gatewayTl.to("#gatewaySubtitle", { opacity: 0, y: -20, duration: 0.5 }, 0);
 gatewayTl.to("#maskWrapper", { 
-    scale: 120, // Increased for smoother 'blast through'
+    scale: 120, 
     ease: "expo.in", 
     duration: 5 
 }, 0);
 
 gatewayTl.to("#gateway", { 
     opacity: 0, 
-    filter: "blur(20px)",
-    duration: 1, 
+    autoAlpha: 0, // ensure it's truly invisible and doesn't block underlying interaction
+    duration: 0.5, 
     ease: "power2.in"
-}, 4);
+}, 4.5);
 
 /* =========================================
    6. ACT 2: 3D POLAROID RUSH + PARALLAX
@@ -326,18 +327,37 @@ const impactTl = gsap.timeline({
 });
 
 impactTl.fromTo(impactWords, 
-    { opacity: 0, filter: "blur(20px)", scale: 0.8 },
-    { opacity: 1, filter: "blur(0px)", scale: 1.0, duration: 1, stagger: 0.2, ease: "power2.out", immediateRender: false }
+    { 
+        opacity: 0.1, // Increased from 0 to be slightly visible
+        filter: "blur(10px)", // Reduced from 20px
+        scale: 0.9,
+        color: "rgba(255,255,255,0.2)"
+    },
+    { 
+        opacity: 1, 
+        filter: "blur(0px)", 
+        scale: 1.0, 
+        color: "#ffffff",
+        duration: 0.8, 
+        stagger: 0.15, 
+        ease: "power2.out", 
+        immediateRender: false,
+        onStart: function() {
+            // This context is the individual tween within the stagger
+            // Get the element being animated
+            this.targets().forEach(el => el.classList.add('active'));
+        }
+    }
 );
 
-// Highlighting words color shift later in the timeline
+// Highlighting words: stronger glow and solid color
 impactTl.to(".reveal-word.highlight", {
     color: "#FBBF24",
-    textShadow: "0 0 30px rgba(251, 191, 36, 0.6)",
+    textShadow: "0 0 40px rgba(251, 191, 36, 0.9)",
     fontWeight: 700,
-    duration: 1,
+    duration: 0.5,
     stagger: 0.1
-}, "-=0.5");
+}, "-=0.3");
 
 /* =========================================
    8. ACT 4: INTERACTIVE ENVELOPES
@@ -476,20 +496,28 @@ musicToggle.addEventListener('click', togglePlay);
 // Autoplay initialization on first interaction
 const initAudio = () => {
     if (isInitialPlay && localStorage.getItem('music_enabled') !== 'false') {
-        bgMusic.play().then(() => {
-            musicToggle.classList.add('playing');
-            musicText.innerText = "PLAYING";
-        }).catch(e => {
-            console.log("Waiting for user interaction to play audio");
-        });
+        const playPromise = bgMusic.play();
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                musicToggle.classList.add('playing');
+                musicText.innerText = "PLAYING";
+            }).catch(ae => {
+                console.log("Audio play blocked by browser. User must click first.");
+            });
+        }
         isInitialPlay = false;
     }
-    window.removeEventListener('scroll', initAudio);
-    window.removeEventListener('click', initAudio);
+    // Only remove listeners if audio actually started playing or if we've tried once
+    if (!isInitialPlay) {
+        window.removeEventListener('scroll', initAudio);
+        window.removeEventListener('click', initAudio);
+        window.removeEventListener('touchstart', initAudio);
+    }
 };
 
-window.addEventListener('scroll', initAudio);
-window.addEventListener('click', initAudio);
+window.addEventListener('scroll', initAudio, { passive: true });
+window.addEventListener('click', initAudio, { passive: true });
+window.addEventListener('touchstart', initAudio, { passive: true });
 
 /* =========================================
    11. CINEMATIC AUTOPLAY ENGINE
