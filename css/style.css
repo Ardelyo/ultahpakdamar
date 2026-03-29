@@ -202,9 +202,7 @@ body {
     display: flex; align-items: center; justify-content: center;
     transform-origin: center center; 
     will-change: transform;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    transform-style: preserve-3d;
+    /* backface-visibility removed: it breaks SVG mask rendering on some mobile browsers */
 }
 
 .svg-mask { width: 100vw; height: 100vh; overflow: visible; }

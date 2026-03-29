@@ -191,11 +191,13 @@ const gatewayTl = gsap.timeline({
         pin: true, 
         scrub: 1,
         onLeaveBack: () => {
-            // Force reset when scrolling to absolute top
-            gsap.set("#gateway", { opacity: 1, scale: 1, pointerEvents: "auto" });
+            // Absolute reset for home screen stability 
+            gsap.set(["#gateway", "#maskWrapper", ".svg-mask", "#gatewaySubtitle"], { 
+                clearProps: "all" 
+            });
+            gsap.set("#gateway", { opacity: 1, visibility: "visible" });
             gsap.set("#maskWrapper", { scale: 1 });
             gsap.set(".svg-mask", { opacity: 1 });
-            gsap.set("#gatewaySubtitle", { opacity: 1, y: 0 });
         }
     }
 });
