@@ -197,13 +197,13 @@ const gatewayTl = gsap.timeline({
     }
 });
 
-// INITIAL SETTINGS
-gsap.set(portalText, { scale: 1, opacity: 1, visibility: "visible" });
-gsap.set("#gateway", { opacity: 1, visibility: "visible" });
+// INITIAL SETTINGS - Ensure absolute visibility
+gsap.set(portalText, { scale: 1, opacity: 1, color: "#ffffff", visibility: "visible", zIndex: 10 });
+gsap.set("#gateway", { opacity: 1, visibility: "visible", zIndex: 100 });
 
 gatewayTl.to("#gatewaySubtitle", { opacity: 0, y: -20, duration: 0.5 }, 0);
 gatewayTl.to(portalText, { 
-    scale: 80, 
+    scale: 100, 
     opacity: 0,
     ease: "power2.in", 
     duration: 5 
@@ -554,67 +554,64 @@ const startAutoplay = () => {
     blockInteraction = true;
     setTimeout(() => { blockInteraction = false; }, 2000);
 
+    // RESET TO TOP FIRST
+    gsap.to(window, { scrollTo: 0, duration: 0.5 });
+
     autoplayTimeline = gsap.timeline({
         onComplete: stopAutoplay
     });
 
-    // 1. Initial Scroll to Top
-    autoplayTimeline.to(window, {
-        duration: 2,
-        scrollTo: { y: 0, autoKill: false },
-        ease: "power2.inOut"
-    });
-
-    // 2. Section Sequence: Gateway -> Polaroid -> Impact -> Quotes
-    
-    // 1. Initial Reset & Audio
+    // 1. Initial State Sync
     autoplayTimeline.add(() => {
-        if (bgMusic.paused) togglePlay();
-        // Force reset any open interactions
+        gsap.set(".scene-gateway, .scene-polaroid, .scene-impact, .scene-quotes, .scene-horizon", { 
+            visibility: "visible", 
+            opacity: 1 
+        });
         envelopes.forEach(e => e.classList.remove('autoplay-active', 'is-open'));
     });
 
-    // 2. Gateway Progress
-    autoplayTimeline.to(gatewayTl, { progress: 1, duration: 5, ease: "slow(0.7, 0.7, false)" });
+    // 2. Drive Timelines Independently
+    // Using pause() on ScrollTrigger might be risky, so we just drive the timelines
+    // and rely on autoAlpha to hide the previous sections.
+    
+    // GATEWAY
+    autoplayTimeline.to(gatewayTl, { progress: 1, duration: 6, ease: "power1.inOut" });
 
-    // 3. Polaroid Progress
-    autoplayTimeline.to(rushTl, { progress: 1, duration: 10, ease: "none" }, "+=0.5");
+    // POLAROID
+    autoplayTimeline.to(rushTl, { progress: 1, duration: 12, ease: "none" }, "+=0.5");
 
-    // 4. Impact Progress
-    autoplayTimeline.to(impactTl, { progress: 1, duration: 8, ease: "none" }, "+=0.5");
+    // IMPACT
+    autoplayTimeline.to(impactTl, { progress: 1, duration: 10, ease: "none" }, "+=0.5");
 
-    // 5. Envelope Sequence (Manual Drive)
+    // ENVELOPES
     envelopes.forEach((env, i) => {
-        // Move to envelopes
-        autoplayTimeline.to(quotesTl, { progress: (i + 1) / envelopes.length, duration: 3, ease: "power2.inOut" }, "+=1");
+        autoplayTimeline.to(quotesTl, { progress: (i + 1) / envelopes.length, duration: 4, ease: "power2.inOut" }, "+=1");
         
-        // Open
         autoplayTimeline.add(() => {
             env.classList.add('autoplay-active');
         }, "+=0.5");
 
-        autoplayTimeline.to({}, { duration: 1.5 }); // Animation wait
+        autoplayTimeline.to({}, { duration: 2 }); 
 
         const scrollArea = env.querySelector('.letter-content');
         if (scrollArea && env.classList.contains('envelope--long')) {
             autoplayTimeline.to(scrollArea, {
                 scrollTop: scrollArea.scrollHeight - scrollArea.clientHeight,
-                duration: 10,
+                duration: 12,
                 ease: "none"
             }, "+=0.5");
             autoplayTimeline.to({}, { duration: 2 }); 
         } else {
-            autoplayTimeline.to({}, { duration: 4 }); 
+            autoplayTimeline.to({}, { duration: 5 }); 
         }
 
-        // Close
         autoplayTimeline.add(() => {
             env.classList.remove('autoplay-active');
         }, "+=0.5");
     });
 
-    // 6. Final Horizon
-    autoplayTimeline.to(horizonTl, { progress: 1, duration: 5, ease: "power1.out" }, "+=1");
+    // HORIZON
+    autoplayTimeline.to(horizonTl, { progress: 1, duration: 6, ease: "power1.out" }, "+=1");
 };
 
 autoplayToggle.addEventListener('click', () => {
