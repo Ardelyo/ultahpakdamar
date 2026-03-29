@@ -206,9 +206,9 @@ body {
 .portal-text {
     font-family: var(--font-serif); font-size: clamp(80px, 15vw, 220px);
     font-weight: 400; line-height: 0.8; letter-spacing: -0.05em;
-    text-align: center; color: transparent;
+    text-align: center; color: white; /* Changed from transparent to white */
     -webkit-text-stroke: 1px rgba(255, 255, 255, 0.2); 
-    z-index: 1; user-select: none;
+    z-index: 5; user-select: none;
     transform-origin: center center;
     will-change: transform, opacity;
 }

@@ -192,18 +192,20 @@ const gatewayTl = gsap.timeline({
         pin: true, 
         scrub: 1,
         onLeave: () => gsap.set("#gateway", { pointerEvents: "none" }),
-        onLeaveBack: () => gsap.set("#gateway", { pointerEvents: "auto", opacity: 1 })
+        onLeaveBack: () => gsap.set("#gateway", { pointerEvents: "auto", opacity: 1 }),
+        invalidateOnRefresh: true
     }
 });
 
 // INITIAL SETTINGS
-gsap.set(portalText, { scale: 1, opacity: 1 });
+gsap.set(portalText, { scale: 1, opacity: 1, visibility: "visible" });
+gsap.set("#gateway", { opacity: 1, visibility: "visible" });
 
 gatewayTl.to("#gatewaySubtitle", { opacity: 0, y: -20, duration: 0.5 }, 0);
 gatewayTl.to(portalText, { 
-    scale: 150, 
+    scale: 80, 
     opacity: 0,
-    ease: "expo.in", 
+    ease: "power2.in", 
     duration: 5 
 }, 0);
 
@@ -211,7 +213,7 @@ gatewayTl.to("#gateway", {
     autoAlpha: 0,
     duration: 0.5, 
     ease: "power2.in"
-}, 4.5);
+}, 4.6);
 
 /* =========================================
    6. ACT 2: 3D POLAROID RUSH + PARALLAX
@@ -549,6 +551,9 @@ const startAutoplay = () => {
     // Ensure music is playing
     if (bgMusic.paused) togglePlay();
 
+    blockInteraction = true;
+    setTimeout(() => { blockInteraction = false; }, 2000);
+
     autoplayTimeline = gsap.timeline({
         onComplete: stopAutoplay
     });
@@ -617,9 +622,10 @@ autoplayToggle.addEventListener('click', () => {
     else startAutoplay();
 });
 
-// Manual Override: Stop if user interacts
+// Manual Override: Stop if user interacts (Wait for 2s after start to prevent accidental kills)
+let blockInteraction = false;
 const handleManualInteraction = () => {
-    if (isAutoplay) {
+    if (isAutoplay && !blockInteraction) {
         console.log("Manual interaction detected, stopping autoplay...");
         stopAutoplay();
     }
