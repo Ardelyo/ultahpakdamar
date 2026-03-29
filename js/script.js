@@ -590,32 +590,48 @@ const startAutoplay = () => {
 
     // 3. Envelope Interaction Sequence
     envelopes.forEach((env, i) => {
-        // Scroll to the quote scene for each envelope to ensure it's "active"
+        // Scroll to and wait for the scene to be fully pinned/ready
         autoplayTimeline.to(window, {
             scrollTo: { y: "#sceneQuotes", autoKill: false },
-            duration: 2,
-            ease: "power1.inOut"
-        }, "+=1");
-
-        autoplayTimeline.add(() => {
-            if (!env.classList.contains('is-open')) env.click();
+            duration: 1.5,
+            ease: "power2.inOut"
         }, "+=0.5");
+
+        // Force open the envelope
+        autoplayTimeline.add(() => {
+            console.log("Autoplay: Opening envelope", i);
+            if (!env.classList.contains('is-open')) {
+                env.click(); 
+            }
+        }, "+=0.5");
+
+        // Wait for the opening animation to finish before scrolling
+        autoplayTimeline.to({}, { duration: 1.5 }); 
 
         const scrollArea = env.querySelector('.letter-content');
         if (scrollArea && env.classList.contains('envelope--long')) {
+            // Reset scroll before starting
+            autoplayTimeline.add(() => { scrollArea.scrollTop = 0; });
+            
             autoplayTimeline.to(scrollArea, {
                 scrollTop: scrollArea.scrollHeight - scrollArea.clientHeight,
-                duration: 12,
+                duration: 10,
                 ease: "none"
-            }, "+=1");
-            autoplayTimeline.to({}, { duration: 2 }); // Brief pause at bottom
+            }, "+=0.5");
+            autoplayTimeline.to({}, { duration: 2 }); 
         } else {
-            autoplayTimeline.to({}, { duration: 4 }); // Simple delay for short 
+            autoplayTimeline.to({}, { duration: 4 }); 
         }
 
+        // Close it
         autoplayTimeline.add(() => {
-            if (env.classList.contains('is-open')) env.click();
-        }, "+=1");
+            console.log("Autoplay: Closing envelope", i);
+            if (env.classList.contains('is-open')) {
+                env.click();
+            }
+        }, "+=0.5");
+        
+        autoplayTimeline.to({}, { duration: 1 }); // Interval between letters
     });
 
     // 4. Final Scroll to Credits
