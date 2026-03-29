@@ -94,7 +94,9 @@ class Particle {
     }
 }
 
-for (let i = 0; i < 70; i++) particles.push(new Particle());
+const isMobileDevice = window.innerWidth < 768;
+const particleCount = isMobileDevice ? 40 : 70;
+for (let i = 0; i < particleCount; i++) particles.push(new Particle());
 
 function animateCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -139,7 +141,8 @@ class Star {
     }
 }
 
-for (let i = 0; i < 150; i++) stars.push(new Star());
+const starCount = isMobileDevice ? 80 : 150;
+for (let i = 0; i < starCount; i++) stars.push(new Star());
 
 function animateStars() {
     sCtx.clearRect(0, 0, starField.width, starField.height);
@@ -182,22 +185,33 @@ ScrollTrigger.create({
    ========================================= */
 const gatewayTl = gsap.timeline({
     scrollTrigger: {
-        trigger: "#gateway", start: "top top", end: "+=150%", pin: true, scrub: 1
+        trigger: "#gateway", 
+        start: "top top", 
+        end: "+=150%", 
+        pin: true, 
+        scrub: 1,
+        onLeaveBack: () => {
+            // Force reset when scrolling to absolute top
+            gsap.set("#gateway", { opacity: 1, scale: 1, pointerEvents: "auto" });
+            gsap.set("#maskWrapper", { scale: 1 });
+            gsap.set(".svg-mask", { opacity: 1 });
+            gsap.set("#gatewaySubtitle", { opacity: 1, y: 0 });
+        }
     }
 });
 gatewayTl.to("#gatewaySubtitle", { opacity: 0, y: -20, duration: 0.5 }, 0);
 gatewayTl.to("#maskWrapper", { 
-    scale: 300, 
+    scale: 80, // Reduced from 300 for mobile stability
     ease: "power2.in", 
     duration: 4 
 }, 0);
 // Blast through effect
 gatewayTl.to("#gateway", { 
     opacity: 0, 
-    scale: 1.2, 
+    scale: 1.1, 
     duration: 1.5, 
     ease: "power2.inOut",
-    pointerEvents: "none" // Allow interacting with underlying layers
+    pointerEvents: "none" 
 }, 3.5);
 gatewayTl.to(".svg-mask", { opacity: 0, duration: 0.2 }, 3.8);
 
@@ -280,19 +294,22 @@ polaroids.forEach((p, i) => {
    7. ACT 3: THE IMPACT (Text Scrub Reveal)
    ========================================= */
 const revealTextEl = document.getElementById("revealText");
-const words = revealTextEl.innerText.split(" ");
-revealTextEl.innerHTML = "";
+const words = revealTextEl.innerText.trim().split(/\s+/);
 
-words.forEach(word => {
-    const span = document.createElement("span");
-    span.className = "reveal-word";
-    const wLower = word.toLowerCase();
-    if(wLower.includes("pengajar") || wLower.includes("ide-ide") || wLower.includes("arsitek") || wLower.includes("keberanian") || wLower.includes("menyenangkan") || wLower.includes("usia") || wLower.includes("selamat")) {
-        span.classList.add("highlight");
-    }
-    span.innerText = word;
-    revealTextEl.appendChild(span);
-});
+// Single initialization check
+if (!revealTextEl.querySelector('.reveal-word')) {
+    revealTextEl.innerHTML = "";
+    words.forEach(word => {
+        const span = document.createElement("span");
+        span.className = "reveal-word";
+        const wLower = word.toLowerCase();
+        if(wLower.includes("pengajar") || wLower.includes("ide-ide") || wLower.includes("arsitek") || wLower.includes("keberanian") || wLower.includes("menyenangkan") || wLower.includes("usia") || wLower.includes("selamat")) {
+            span.classList.add("highlight");
+        }
+        span.innerText = word;
+        revealTextEl.appendChild(span);
+    });
+}
 
 // Cinematic Reveal: Blur to Focus + Slowdown
 const impactWords = gsap.utils.toArray(".reveal-word");
