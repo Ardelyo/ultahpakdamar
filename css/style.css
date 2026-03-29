@@ -189,40 +189,42 @@ body {
 }
 
 /* =========================================
-   ACT 1: THE GATEWAY
+   ACT 1: THE GATEWAY (Robust Clip-Path)
    ========================================= */
 .scene-gateway {
     position: relative; height: 100vh; width: 100vw;
     display: flex; align-items: center; justify-content: center;
+    background: var(--color-3); overflow: hidden;
+}
+
+.portal-container {
+    position: relative; width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
     overflow: hidden;
 }
 
-.mask-wrapper {
-    position: absolute; inset: 0; width: 100%; height: 100%;
-    display: flex; align-items: center; justify-content: center;
-    transform-origin: center center; 
-    will-change: transform;
-    overflow: visible; /* Prevent clipping that looks like a box */
-    z-index: 5;
+.portal-text {
+    font-family: var(--font-serif); font-size: clamp(80px, 15vw, 220px);
+    font-weight: 400; line-height: 0.8; letter-spacing: -0.05em;
+    text-align: center; color: transparent;
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.2); 
+    z-index: 1; user-select: none;
+    transform-origin: center center;
+    will-change: transform, opacity;
 }
 
-.svg-mask { 
-    width: 100vw; height: 100vh; 
-    overflow: visible; 
-    display: block; 
-}
-
-/* Ensure the portal text in SVG starts hidden and scales from center */
-.svg-mask text {
-    transform-box: fill-box;
-    transform-origin: center;
+.portal-overlay {
+    position: absolute; inset: 0; background: var(--overlay-color);
+    z-index: 2;
+    /* This will be handled by Clip-Path in JS for more flexibility */
+    pointer-events: none;
 }
 
 .gateway-subtitle {
     position: absolute; bottom: 10vh; left: 50%; transform: translateX(-50%);
     font-family: var(--font-sans); font-size: 0.9rem; letter-spacing: 0.3em;
     text-transform: uppercase; color: var(--text-muted); font-weight: 600;
-    text-align: center;
+    text-align: center; z-index: 3;
 }
 
 .gateway-line {

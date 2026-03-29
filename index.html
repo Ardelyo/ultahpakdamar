@@ -59,25 +59,9 @@
         
         <!-- ACT 1: THE GATEWAY -->
         <section class="scene-gateway" id="gateway">
-            <div class="mask-wrapper" id="maskWrapper">
-                <svg class="svg-mask" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice">
-                    <defs>
-                        <mask id="text-portal">
-                            <rect width="100%" height="100%" fill="white" />
-                            <text x="50%" y="42%" text-anchor="middle" dominant-baseline="middle" 
-                                  font-family="'Instrument Serif', serif" font-size="200" font-weight="400" 
-                                  letter-spacing="-2" fill="black" class="interactive-hover">
-                                PAK
-                            </text>
-                            <text x="50%" y="58%" text-anchor="middle" dominant-baseline="middle" 
-                                  font-family="'Instrument Serif', serif" font-size="200" font-weight="400" 
-                                  letter-spacing="-2" fill="black" class="interactive-hover">
-                                DAMAR
-                            </text>
-                        </mask>
-                    </defs>
-                    <rect width="100%" height="100%" fill="var(--overlay-color)" mask="url(#text-portal)" />
-                </svg>
+            <div class="portal-container" id="portalContainer">
+                <div class="portal-text interactive-hover">PAK<br>DAMAR</div>
+                <div class="portal-overlay"></div>
             </div>
             <div class="gateway-subtitle" id="gatewaySubtitle">
                 Scroll untuk mulai

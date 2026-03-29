@@ -183,6 +183,7 @@ ScrollTrigger.create({
 /* =========================================
    5. ACT 1: THE GATEWAY
    ========================================= */
+const portalText = document.querySelector('.portal-text');
 const gatewayTl = gsap.timeline({
     scrollTrigger: {
         trigger: "#gateway", 
@@ -190,30 +191,24 @@ const gatewayTl = gsap.timeline({
         end: "+=150%", 
         pin: true, 
         scrub: 1,
-        onLeave: () => {
-            gsap.set("#gateway", { pointerEvents: "none" });
-        },
-        onLeaveBack: () => {
-            gsap.set("#gateway", { pointerEvents: "auto", opacity: 1 });
-        }
+        onLeave: () => gsap.set("#gateway", { pointerEvents: "none" }),
+        onLeaveBack: () => gsap.set("#gateway", { pointerEvents: "auto", opacity: 1 })
     }
 });
 
-// INITIAL SETTINGS TO PREVENT GLITCH
-gsap.set("#maskWrapper", { transformOrigin: "50% 50%", scale: 1 });
-gsap.set("#gateway text", { transformOrigin: "50% 50%" });
+// INITIAL SETTINGS
+gsap.set(portalText, { scale: 1, opacity: 1 });
 
-// Acts are placed closer to each other to prevent "blank" space
 gatewayTl.to("#gatewaySubtitle", { opacity: 0, y: -20, duration: 0.5 }, 0);
-gatewayTl.to("#maskWrapper", { 
-    scale: 120, 
+gatewayTl.to(portalText, { 
+    scale: 150, 
+    opacity: 0,
     ease: "expo.in", 
     duration: 5 
 }, 0);
 
 gatewayTl.to("#gateway", { 
-    opacity: 0, 
-    autoAlpha: 0, // ensure it's truly invisible and doesn't block underlying interaction
+    autoAlpha: 0,
     duration: 0.5, 
     ease: "power2.in"
 }, 4.5);
@@ -567,50 +562,36 @@ const startAutoplay = () => {
 
     // 2. Section Sequence: Gateway -> Polaroid -> Impact -> Quotes
     
-    // Progress to Polaroid (Act 2)
-    autoplayTimeline.to(window, {
-        scrollTo: { y: "#polaroidScene", autoKill: false },
-        duration: 8,
-        ease: "none"
-    }, "+=1");
+    // 1. Initial Reset & Audio
+    autoplayTimeline.add(() => {
+        if (bgMusic.paused) togglePlay();
+        // Force reset any open interactions
+        envelopes.forEach(e => e.classList.remove('autoplay-active', 'is-open'));
+    });
 
-    // Through Polaroid to Impact (Act 3)
-    autoplayTimeline.to(window, {
-        scrollTo: { y: "#impactScene", autoKill: false },
-        duration: 10,
-        ease: "none"
-    }, "+=1");
+    // 2. Gateway Progress
+    autoplayTimeline.to(gatewayTl, { progress: 1, duration: 5, ease: "slow(0.7, 0.7, false)" });
 
-    // Through Impact to Quote (Act 4)
-    autoplayTimeline.to(window, {
-        scrollTo: { y: "#sceneQuotes", autoKill: false },
-        duration: 12,
-        ease: "none"
-    }, "+=1");
+    // 3. Polaroid Progress
+    autoplayTimeline.to(rushTl, { progress: 1, duration: 10, ease: "none" }, "+=0.5");
 
-    // 3. Envelope Interaction Sequence
+    // 4. Impact Progress
+    autoplayTimeline.to(impactTl, { progress: 1, duration: 8, ease: "none" }, "+=0.5");
+
+    // 5. Envelope Sequence (Manual Drive)
     envelopes.forEach((env, i) => {
-        // Scroll to and wait for the scene to be fully pinned/ready
-        autoplayTimeline.to(window, {
-            scrollTo: { y: "#sceneQuotes", autoKill: false },
-            duration: 1.5,
-            ease: "power2.inOut"
-        }, "+=0.5");
-
-        // Force open the envelope
+        // Move to envelopes
+        autoplayTimeline.to(quotesTl, { progress: (i + 1) / envelopes.length, duration: 3, ease: "power2.inOut" }, "+=1");
+        
+        // Open
         autoplayTimeline.add(() => {
-            console.log("Autoplay: Opening envelope", i);
             env.classList.add('autoplay-active');
         }, "+=0.5");
 
-        // Wait for the opening animation to finish before scrolling
-        autoplayTimeline.to({}, { duration: 1.5 }); 
+        autoplayTimeline.to({}, { duration: 1.5 }); // Animation wait
 
         const scrollArea = env.querySelector('.letter-content');
         if (scrollArea && env.classList.contains('envelope--long')) {
-            // Reset scroll before starting
-            autoplayTimeline.add(() => { scrollArea.scrollTop = 0; });
-            
             autoplayTimeline.to(scrollArea, {
                 scrollTop: scrollArea.scrollHeight - scrollArea.clientHeight,
                 duration: 10,
@@ -621,21 +602,14 @@ const startAutoplay = () => {
             autoplayTimeline.to({}, { duration: 4 }); 
         }
 
-        // Close it
+        // Close
         autoplayTimeline.add(() => {
-            console.log("Autoplay: Closing envelope", i);
             env.classList.remove('autoplay-active');
         }, "+=0.5");
-        
-        autoplayTimeline.to({}, { duration: 1 }); // Interval between letters
     });
 
-    // 4. Final Scroll to Credits
-    autoplayTimeline.to(window, {
-        scrollTo: { y: "#horizon", autoKill: false },
-        duration: 10,
-        ease: "none"
-    }, "+=1");
+    // 6. Final Horizon
+    autoplayTimeline.to(horizonTl, { progress: 1, duration: 5, ease: "power1.out" }, "+=1");
 };
 
 autoplayToggle.addEventListener('click', () => {
