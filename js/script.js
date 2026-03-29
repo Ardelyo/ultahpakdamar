@@ -598,22 +598,70 @@ const startAutoplay = () => {
     // ── ACT 3: Impact Text ── scroll through the words slowly
     autoplayTimeline.add(scrollTo(impactEnd, 10, "none"), "+=0.2");
 
-    // ── ACT 4: Envelopes ── reveal each one + open/close ──
+    // ── ACT 4: Envelopes ── open, read, close each one ──
     const envCount = envelopes.length;
     envelopes.forEach((env, i) => {
-        // Scroll to the point in quotes timeline where this envelope is visible
+        // Step 1: Scroll to where this envelope is visible on screen
         const envScrollPos = quotesStart + ((i / envCount) * (quotesEnd - quotesStart));
         autoplayTimeline.add(scrollTo(envScrollPos, 2.5, "power2.inOut"), "+=0.3");
 
-        // Open the envelope
-        autoplayTimeline.add(() => { env.classList.add('autoplay-active'); }, "+=0.4");
+        // Step 2: Open — add class (CSS shows card) + fire the GSAP pop animation
+        autoplayTimeline.add(() => {
+            env.classList.add('autoplay-active');
+            const card = env.querySelector('.envelope-card');
+            if (card) {
+                gsap.fromTo(card,
+                    { opacity: 0, scale: 0.8, y: 50 },
+                    { opacity: 1, scale: 1, y: 0, duration: 1.2, ease: "elastic.out(1, 0.75)" }
+                );
+                gsap.to(env, { rotationZ: "random(-2, 2)", duration: 0.1, repeat: 3, yoyo: true });
+            }
+        }, "+=0.4");
 
-        // For the long envelope, wait longer
-        const readTime = env.classList.contains('envelope--long') ? 12 : 5;
-        autoplayTimeline.to({}, { duration: readTime });
+        // Step 3a: For the long letter — wait for card to open then auto-scroll from top to bottom
+        const isLong = env.classList.contains('envelope--long');
+        if (isLong) {
+            // Wait for open animation to finish (1.2s) before scrolling
+            autoplayTimeline.to({}, { duration: 1.4 });
+            // Auto-scroll the letter content
+            autoplayTimeline.add(() => {
+                const scrollArea = env.querySelector('.letter-content');
+                if (scrollArea) {
+                    // Read scrollHeight AFTER card is open so DOM is fully rendered
+                    const maxScroll = scrollArea.scrollHeight - scrollArea.clientHeight;
+                    gsap.to(scrollArea, {
+                        scrollTop: maxScroll > 0 ? maxScroll : 1,
+                        duration: 14,
+                        ease: "none",
+                        delay: 0.3
+                    });
+                }
+            });
+            autoplayTimeline.to({}, { duration: 15 }); // Wait for full scroll read
+        } else {
+            // Short letter — just pause for reading
+            autoplayTimeline.to({}, { duration: 4.5 });
+        }
 
-        // Close the envelope
-        autoplayTimeline.add(() => { env.classList.remove('autoplay-active'); }, "+=0.3");
+        // Step 4: Close — fade card out, reset scroll, remove class
+        autoplayTimeline.add(() => {
+            const card = env.querySelector('.envelope-card');
+            if (card) {
+                gsap.to(card, {
+                    opacity: 0, scale: 0.9, y: -20, duration: 0.6, ease: "power2.in",
+                    onComplete: () => {
+                        const scrollArea = card.querySelector('.letter-content');
+                        if (scrollArea) scrollArea.scrollTop = 0;
+                        env.classList.remove('autoplay-active');
+                    }
+                });
+            } else {
+                env.classList.remove('autoplay-active');
+            }
+        }, "+=0.3");
+
+        // Pause between envelopes
+        autoplayTimeline.to({}, { duration: 0.8 });
     });
 
     // ── ACT 5: Final Celebration ──
