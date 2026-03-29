@@ -190,32 +190,32 @@ const gatewayTl = gsap.timeline({
         end: "+=150%", 
         pin: true, 
         scrub: 1,
+        onLeave: () => {
+            gsap.set("#gateway", { pointerEvents: "none" });
+        },
         onLeaveBack: () => {
-            // Absolute reset for home screen stability 
-            gsap.set(["#gateway", "#maskWrapper", ".svg-mask", "#gatewaySubtitle"], { 
-                clearProps: "all" 
-            });
-            gsap.set("#gateway", { opacity: 1, visibility: "visible" });
-            gsap.set("#maskWrapper", { scale: 1 });
-            gsap.set(".svg-mask", { opacity: 1 });
+            gsap.set("#gateway", { pointerEvents: "auto", opacity: 1 });
         }
     }
 });
+
+// INITIAL SETTINGS TO PREVENT GLITCH
+gsap.set("#maskWrapper", { transformOrigin: "50% 50%", scale: 1 });
+gsap.set("#gateway text", { transformOrigin: "50% 50%" });
+
 gatewayTl.to("#gatewaySubtitle", { opacity: 0, y: -20, duration: 0.5 }, 0);
 gatewayTl.to("#maskWrapper", { 
-    scale: 80, // Reduced from 300 for mobile stability
-    ease: "power2.in", 
-    duration: 4 
+    scale: 120, // Increased for smoother 'blast through'
+    ease: "expo.in", 
+    duration: 5 
 }, 0);
-// Blast through effect
+
 gatewayTl.to("#gateway", { 
     opacity: 0, 
-    scale: 1.1, 
-    duration: 1.5, 
-    ease: "power2.inOut",
-    pointerEvents: "none" 
-}, 3.5);
-gatewayTl.to(".svg-mask", { opacity: 0, duration: 0.2 }, 3.8);
+    filter: "blur(20px)",
+    duration: 1, 
+    ease: "power2.in"
+}, 4);
 
 /* =========================================
    6. ACT 2: 3D POLAROID RUSH + PARALLAX
@@ -562,25 +562,32 @@ const startAutoplay = () => {
 
     // 3. Envelope Interaction Sequence
     envelopes.forEach((env, i) => {
-        autoplayTimeline.add(() => {
-            env.click(); // Open envelope
+        // Scroll to the quote scene for each envelope to ensure it's "active"
+        autoplayTimeline.to(window, {
+            scrollTo: { y: "#sceneQuotes", autoKill: false },
+            duration: 2,
+            ease: "power1.inOut"
         }, "+=1");
 
-        // If it's a long letter, scroll its content
+        autoplayTimeline.add(() => {
+            if (!env.classList.contains('is-open')) env.click();
+        }, "+=0.5");
+
         const scrollArea = env.querySelector('.letter-content');
         if (scrollArea && env.classList.contains('envelope--long')) {
             autoplayTimeline.to(scrollArea, {
                 scrollTop: scrollArea.scrollHeight - scrollArea.clientHeight,
-                duration: 15, // Smooth reading speed
+                duration: 12,
                 ease: "none"
-            }, "+=2");
+            }, "+=1");
+            autoplayTimeline.to({}, { duration: 2 }); // Brief pause at bottom
         } else {
-            autoplayTimeline.to({}, { duration: 5 }); // Wait for short letter
+            autoplayTimeline.to({}, { duration: 4 }); // Simple delay for short 
         }
 
         autoplayTimeline.add(() => {
-            env.click(); // Close envelope
-        }, "+=2");
+            if (env.classList.contains('is-open')) env.click();
+        }, "+=1");
     });
 
     // 4. Final Scroll to Credits

@@ -202,10 +202,21 @@ body {
     display: flex; align-items: center; justify-content: center;
     transform-origin: center center; 
     will-change: transform;
-    /* backface-visibility removed: it breaks SVG mask rendering on some mobile browsers */
+    overflow: visible; /* Prevent clipping that looks like a box */
+    z-index: 5;
 }
 
-.svg-mask { width: 100vw; height: 100vh; overflow: visible; }
+.svg-mask { 
+    width: 100vw; height: 100vh; 
+    overflow: visible; 
+    display: block; 
+}
+
+/* Ensure the portal text in SVG starts hidden and scales from center */
+.svg-mask text {
+    transform-box: fill-box;
+    transform-origin: center;
+}
 
 .gateway-subtitle {
     position: absolute; bottom: 10vh; left: 50%; transform: translateX(-50%);
