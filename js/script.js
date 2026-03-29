@@ -600,9 +600,7 @@ const startAutoplay = () => {
         // Force open the envelope
         autoplayTimeline.add(() => {
             console.log("Autoplay: Opening envelope", i);
-            if (!env.classList.contains('is-open')) {
-                env.click(); 
-            }
+            env.classList.add('autoplay-active');
         }, "+=0.5");
 
         // Wait for the opening animation to finish before scrolling
@@ -626,9 +624,7 @@ const startAutoplay = () => {
         // Close it
         autoplayTimeline.add(() => {
             console.log("Autoplay: Closing envelope", i);
-            if (env.classList.contains('is-open')) {
-                env.click();
-            }
+            env.classList.remove('autoplay-active');
         }, "+=0.5");
         
         autoplayTimeline.to({}, { duration: 1 }); // Interval between letters
